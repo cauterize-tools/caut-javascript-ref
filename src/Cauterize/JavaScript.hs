@@ -1,0 +1,3 @@
+module Cauterize.JavaScript
+  (
+  ) where
