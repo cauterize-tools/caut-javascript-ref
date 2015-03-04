@@ -13,6 +13,7 @@ import System.FilePath.Posix
 import Text.Hastache
 import Text.Hastache.Context
 
+import qualified Cauterize.Common.Types as C
 import qualified Cauterize.FormHash as H
 import qualified Cauterize.Specification as Spec
 import qualified Cauterize.Meta as Meta
@@ -69,6 +70,7 @@ caut2js (CautJSOpts { specFile = specPath, metaFile = metaPath, outputDirectory 
         Left em -> error $ show em
         Right m' -> generateOutput s' m' outPath
 
+generateOutput :: Spec.Spec -> Meta.Meta -> FilePath -> IO ()
 generateOutput spec meta out = do
   copyFiles
   renderFiles
@@ -112,21 +114,29 @@ data JSMetaCtx = JSMetaCtx
   , jsmTypeWidth :: Integer
   } deriving (Show, Eq, Data, Typeable)
 
+data JSTypeInfo = JSTypeInfo
+  { jstPrototype :: T.Text, jstName :: T.Text, jstHash :: [Word8], jstSize :: JSTSizeCtx
+  } deriving (Show, Eq, Data, Typeable)
+
+data JSBIClassification
+  = JSBIUnsigned
+  | JSBISigned
+  | JSBIFloat
+  | JSBIBool
+  deriving (Show, Eq, Data, Typeable)
+
 data JSTypeCtx
   = JSTBuiltIn
-      { jstPrototype :: T.Text, jstName :: T.Text, jstHash :: [Word8], jstSize :: JSTSizeCtx }
-  | JSTSynonym
-      { jstPrototype :: T.Text, jstName :: T.Text, jstHash :: [Word8], jstSize :: JSTSizeCtx }
-  | JSTArray
-      { jstPrototype :: T.Text, jstName :: T.Text, jstHash :: [Word8], jstSize :: JSTSizeCtx }
-  | JSTVector
-      { jstPrototype :: T.Text, jstName :: T.Text, jstHash :: [Word8], jstSize :: JSTSizeCtx }
-  | JSTRecord
-      { jstPrototype :: T.Text, jstName :: T.Text, jstHash :: [Word8], jstSize :: JSTSizeCtx }
-  | JSTCombination
-      { jstPrototype :: T.Text, jstName :: T.Text, jstHash :: [Word8], jstSize :: JSTSizeCtx }
-  | JSTUnion
-      { jstPrototype :: T.Text, jstName :: T.Text, jstHash :: [Word8], jstSize :: JSTSizeCtx }
+      { jstDetail :: JSTypeInfo
+      , builtinWidth :: Integer
+      , builtinClassification :: JSBIClassification
+      }
+  | JSTSynonym { jstDetail :: JSTypeInfo }
+  | JSTArray { jstDetail :: JSTypeInfo }
+  | JSTVector { jstDetail :: JSTypeInfo }
+  | JSTRecord { jstDetail :: JSTypeInfo }
+  | JSTCombination { jstDetail :: JSTypeInfo }
+  | JSTUnion { jstDetail :: JSTypeInfo }
   deriving (Show, Eq, Data, Typeable)
 
 data JSTSizeCtx = JSTSizeCtx { jstMinSize :: Integer, jstMaxSize :: Integer }
@@ -146,31 +156,46 @@ mkJsCtx spec meta = JSCtx
 mkJsType :: Spec.SpType -> JSTypeCtx
 mkJsType t =
   case t of
-    Spec.BuiltIn {}     -> JSTBuiltIn { jstName = tn, jstHash = thbs, jstSize = sz
-                                      , jstPrototype = "builtin"
-                                      }
-    Spec.Synonym {}     -> JSTSynonym { jstName = tn, jstHash = thbs, jstSize = sz
-                                      , jstPrototype = "synonym"
-                                      }
-    Spec.Array {}       -> JSTArray { jstName = tn, jstHash = thbs, jstSize = sz
-                                    , jstPrototype = "array"
-                                    }
-    Spec.Vector {}      -> JSTVector { jstName = tn, jstHash = thbs, jstSize = sz
-                                     , jstPrototype = "vector"
-                                     }
-    Spec.Record {}      -> JSTRecord { jstName = tn, jstHash = thbs, jstSize = sz
-                                     , jstPrototype = "record"
-                                     }
-    Spec.Combination {} -> JSTCombination { jstName = tn, jstHash = thbs, jstSize = sz
-                                          , jstPrototype = "combination"
-                                          }
-    Spec.Union {}       -> JSTUnion { jstName = tn, jstHash = thbs, jstSize = sz
-                                    , jstPrototype = "union"
-                                    }
+    Spec.BuiltIn { Spec.unBuiltIn = b }
+      -> JSTBuiltIn { jstDetail = mkTypeInfo "builtin"
+                    , builtinWidth = Spec.maxSize t
+                    , builtinClassification = classify b
+                    }
+    Spec.Synonym {}
+      -> JSTSynonym { jstDetail = mkTypeInfo "synonym" }
+    Spec.Array {}
+      -> JSTArray { jstDetail = mkTypeInfo "array" }
+    Spec.Vector {}
+      -> JSTVector { jstDetail = mkTypeInfo "vector" }
+    Spec.Record {}
+      -> JSTRecord { jstDetail = mkTypeInfo "record" }
+    Spec.Combination {}
+      -> JSTCombination { jstDetail = mkTypeInfo "combination" }
+    Spec.Union {}
+      -> JSTUnion { jstDetail = mkTypeInfo "union" }
   where
-    tn = Spec.typeName t
-    thbs = H.hashToBytes . Spec.spHash $ t
-    sz = JSTSizeCtx { jstMinSize = Spec.minSize t, jstMaxSize = Spec.maxSize t }
+    mkTypeInfo p =
+      JSTypeInfo
+        { jstName = Spec.typeName t
+        , jstHash = H.hashToBytes . Spec.spHash $ t
+        , jstSize = JSTSizeCtx { jstMinSize = Spec.minSize t, jstMaxSize = Spec.maxSize t }
+        , jstPrototype = p
+        }
+
+    classify (C.TBuiltIn C.BIu8)  = JSBIUnsigned
+    classify (C.TBuiltIn C.BIu16) = JSBIUnsigned
+    classify (C.TBuiltIn C.BIu32) = JSBIUnsigned
+    classify (C.TBuiltIn C.BIu64) = JSBIUnsigned
+    classify (C.TBuiltIn C.BIcu8)  = JSBIUnsigned
+    classify (C.TBuiltIn C.BIcu16) = JSBIUnsigned
+    classify (C.TBuiltIn C.BIcu32) = JSBIUnsigned
+    classify (C.TBuiltIn C.BIs8)  = JSBISigned
+    classify (C.TBuiltIn C.BIs16) = JSBISigned
+    classify (C.TBuiltIn C.BIs32) = JSBISigned
+    classify (C.TBuiltIn C.BIs64) = JSBISigned
+    classify (C.TBuiltIn C.BIf32) = JSBIFloat
+    classify (C.TBuiltIn C.BIf64) = JSBIFloat
+    classify (C.TBuiltIn C.BIbool) = JSBIBool
 
 renderTo :: Spec.Spec -> Meta.Meta -> FilePath -> FilePath -> IO ()
 renderTo spec meta templatePath destPath = do

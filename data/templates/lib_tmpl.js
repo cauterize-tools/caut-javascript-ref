@@ -16,11 +16,11 @@ function MetaInfo() {
 function TypeInfo() {
   this.types = {
 {{#jscTypes}}
-    '{{jstName}}': {
-      name: '{{jstName}}',
-      proto: '{{jstPrototype}}',
-      hash: [{{#jstHash}}{{.}},{{/jstHash}}],
-      size: { min: {{jstSize.jstMinSize}}, max: {{jstSize.jstMaxSize}} },
+    '{{jstDetail.jstName}}': {
+      name: '{{jstDetail.jstName}}',
+      proto: '{{jstDetail.jstPrototype}}',
+      hash: [{{#jstDetail.jstHash}}{{.}},{{/jstDetail.jstHash}}],
+      size: { min: {{jstDetail.jstSize.jstMinSize}}, max: {{jstDetail.jstSize.jstMaxSize}} },
     },
 {{/jscTypes}}
   };

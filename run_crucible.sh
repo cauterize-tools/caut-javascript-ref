@@ -8,5 +8,5 @@
            --run-cmd="node js/test_client.js" \
            --schema-count=1 \
            --instance-count=1 \
-           --type-count=20 \
+           --type-count=3 \
            --enc-size=1024
