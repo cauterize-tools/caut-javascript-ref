@@ -15,6 +15,10 @@ build-type:          Simple
 -- extra-source-files:  
 cabal-version:       >=1.10
 
+data-dir:   data
+data-files: templates/*.js,
+            support/*.js
+
 library
   hs-source-dirs:      src/
   ghc-options:         -Wall -O2
@@ -22,7 +26,8 @@ library
   -- other-modules:       
   -- other-extensions:    
   build-depends:       base >=4.7 && <4.8,
-                       cauterize >= 0.1.0.0
+                       cauterize >= 0.1.0.0,
+                       hastache == 0.6.0
   default-language:    Haskell2010
 
 executable caut-javascript-ref-gen
@@ -33,7 +38,8 @@ executable caut-javascript-ref-gen
   build-depends:       base >=4.7 && <4.8,
                        cauterize >= 0.1.0.0,
                        caut-javascript-ref,
-                       optparse-applicative,
                        directory,
                        filepath,
+                       hastache == 0.6.0,
+                       optparse-applicative,
                        text
