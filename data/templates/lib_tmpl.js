@@ -14,6 +14,16 @@ function MetaInfo() {
 {{/jscMeta}}
 
 function TypeInfo() {
+  this.types = {
+{{#jscTypes}}
+    '{{jstName}}': {
+      name: '{{jstName}}',
+      proto: '{{jstPrototype}}',
+      hash: [{{#jstHash}}{{.}},{{/jstHash}}],
+      size: { min: {{jstSize.jstMinSize}}, max: {{jstSize.jstMaxSize}} },
+    },
+{{/jscTypes}}
+  };
 }
 
 exports.CautInfo = function () {

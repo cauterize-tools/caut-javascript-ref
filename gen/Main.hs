@@ -6,12 +6,14 @@ module Main
 import Cauterize.JavaScript
 
 import Data.Data
+import Data.Word
 import Options.Applicative
 import System.Directory
 import System.FilePath.Posix
 import Text.Hastache
 import Text.Hastache.Context
 
+import qualified Cauterize.FormHash as H
 import qualified Cauterize.Specification as Spec
 import qualified Cauterize.Meta as Meta
 import qualified Data.Text.Lazy as T
@@ -102,12 +104,33 @@ createGuard out go = do
 data JSCtx = JSCtx
   { jscLibName :: T.Text
   , jscMeta :: JSMetaCtx
+  , jscTypes :: [JSTypeCtx]
   } deriving (Show, Eq, Data, Typeable)
 
 data JSMetaCtx = JSMetaCtx
   { jsmLengthWidth :: Integer
   , jsmTypeWidth :: Integer
   } deriving (Show, Eq, Data, Typeable)
+
+data JSTypeCtx
+  = JSTBuiltIn
+      { jstPrototype :: T.Text, jstName :: T.Text, jstHash :: [Word8], jstSize :: JSTSizeCtx }
+  | JSTSynonym
+      { jstPrototype :: T.Text, jstName :: T.Text, jstHash :: [Word8], jstSize :: JSTSizeCtx }
+  | JSTArray
+      { jstPrototype :: T.Text, jstName :: T.Text, jstHash :: [Word8], jstSize :: JSTSizeCtx }
+  | JSTVector
+      { jstPrototype :: T.Text, jstName :: T.Text, jstHash :: [Word8], jstSize :: JSTSizeCtx }
+  | JSTRecord
+      { jstPrototype :: T.Text, jstName :: T.Text, jstHash :: [Word8], jstSize :: JSTSizeCtx }
+  | JSTCombination
+      { jstPrototype :: T.Text, jstName :: T.Text, jstHash :: [Word8], jstSize :: JSTSizeCtx }
+  | JSTUnion
+      { jstPrototype :: T.Text, jstName :: T.Text, jstHash :: [Word8], jstSize :: JSTSizeCtx }
+  deriving (Show, Eq, Data, Typeable)
+
+data JSTSizeCtx = JSTSizeCtx { jstMinSize :: Integer, jstMaxSize :: Integer }
+  deriving (Show, Eq, Data, Typeable)
 
 mkJsCtx :: Spec.Spec -> Meta.Meta -> JSCtx
 mkJsCtx spec meta = JSCtx
@@ -117,7 +140,37 @@ mkJsCtx spec meta = JSCtx
         { jsmLengthWidth = Meta.metaDataLength meta
         , jsmTypeWidth = Meta.metaTypeLength meta
         }
+  , jscTypes = map mkJsType (Spec.specTypes spec)
   }
+
+mkJsType :: Spec.SpType -> JSTypeCtx
+mkJsType t =
+  case t of
+    Spec.BuiltIn {}     -> JSTBuiltIn { jstName = tn, jstHash = thbs, jstSize = sz
+                                      , jstPrototype = "builtin"
+                                      }
+    Spec.Synonym {}     -> JSTSynonym { jstName = tn, jstHash = thbs, jstSize = sz
+                                      , jstPrototype = "synonym"
+                                      }
+    Spec.Array {}       -> JSTArray { jstName = tn, jstHash = thbs, jstSize = sz
+                                    , jstPrototype = "array"
+                                    }
+    Spec.Vector {}      -> JSTVector { jstName = tn, jstHash = thbs, jstSize = sz
+                                     , jstPrototype = "vector"
+                                     }
+    Spec.Record {}      -> JSTRecord { jstName = tn, jstHash = thbs, jstSize = sz
+                                     , jstPrototype = "record"
+                                     }
+    Spec.Combination {} -> JSTCombination { jstName = tn, jstHash = thbs, jstSize = sz
+                                          , jstPrototype = "combination"
+                                          }
+    Spec.Union {}       -> JSTUnion { jstName = tn, jstHash = thbs, jstSize = sz
+                                    , jstPrototype = "union"
+                                    }
+  where
+    tn = Spec.typeName t
+    thbs = H.hashToBytes . Spec.spHash $ t
+    sz = JSTSizeCtx { jstMinSize = Spec.minSize t, jstMaxSize = Spec.maxSize t }
 
 renderTo :: Spec.Spec -> Meta.Meta -> FilePath -> FilePath -> IO ()
 renderTo spec meta templatePath destPath = do
