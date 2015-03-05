@@ -1,3 +1,5 @@
+var builtin = require('./builin.js');
+
 function bytes1ToInt(u8array, offset) {
   return u8array[offset];
 }
