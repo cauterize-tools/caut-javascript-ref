@@ -1,4 +1,6 @@
-var b = require('./builtin.js')
+/*global Uint8Array*/
+'use strict';
+var b = require('./builtin.js');
 
 var a = new Uint8Array([0x01,0x02,0x03,0x04
                        ,0x05,0x06,0x07,0x08]);
