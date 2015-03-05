@@ -3,8 +3,6 @@ module Main
   ( main
   ) where
 
-import Cauterize.JavaScript
-
 import Data.Data
 import Data.Word
 import Options.Applicative
@@ -156,7 +154,7 @@ mkJsCtx spec meta = JSCtx
 mkJsType :: Spec.SpType -> JSTypeCtx
 mkJsType t =
   case t of
-    Spec.BuiltIn { Spec.unBuiltIn = b }
+    Spec.BuiltIn { Spec.unBuiltIn = C.TBuiltIn b }
       -> JSTBuiltIn { jstDetail = mkTypeInfo "builtin"
                     , builtinWidth = Spec.maxSize t
                     , builtinClassification = classify b
@@ -182,20 +180,20 @@ mkJsType t =
         , jstPrototype = p
         }
 
-    classify (C.TBuiltIn C.BIu8)  = JSBIUnsigned
-    classify (C.TBuiltIn C.BIu16) = JSBIUnsigned
-    classify (C.TBuiltIn C.BIu32) = JSBIUnsigned
-    classify (C.TBuiltIn C.BIu64) = JSBIUnsigned
-    classify (C.TBuiltIn C.BIcu8)  = JSBIUnsigned
-    classify (C.TBuiltIn C.BIcu16) = JSBIUnsigned
-    classify (C.TBuiltIn C.BIcu32) = JSBIUnsigned
-    classify (C.TBuiltIn C.BIs8)  = JSBISigned
-    classify (C.TBuiltIn C.BIs16) = JSBISigned
-    classify (C.TBuiltIn C.BIs32) = JSBISigned
-    classify (C.TBuiltIn C.BIs64) = JSBISigned
-    classify (C.TBuiltIn C.BIf32) = JSBIFloat
-    classify (C.TBuiltIn C.BIf64) = JSBIFloat
-    classify (C.TBuiltIn C.BIbool) = JSBIBool
+    classify C.BIu8  = JSBIUnsigned
+    classify C.BIu16 = JSBIUnsigned
+    classify C.BIu32 = JSBIUnsigned
+    classify C.BIu64 = JSBIUnsigned
+    classify C.BIcu8 = JSBIUnsigned
+    classify C.BIcu16 = JSBIUnsigned
+    classify C.BIcu32 = JSBIUnsigned
+    classify C.BIs8 = JSBISigned
+    classify C.BIs16 = JSBISigned
+    classify C.BIs32 = JSBISigned
+    classify C.BIs64 = JSBISigned
+    classify C.BIf32 = JSBIFloat
+    classify C.BIf64 = JSBIFloat
+    classify C.BIbool = JSBIBool
 
 renderTo :: Spec.Spec -> Meta.Meta -> FilePath -> FilePath -> IO ()
 renderTo spec meta templatePath destPath = do
