@@ -86,9 +86,9 @@ generateOutput spec meta out = do
 
     copyFiles = do
       ca <- getDataFileName "support/cauterize.js"
-      md <- getDataFileName "support/meta_decoder.js"
+      bi <- getDataFileName "support/builtin_lib.js"
       copyFile ca (out `combine` "cauterize.js")
-      copyFile md (out `combine` "meta_decoder.js")
+      copyFile bi (out `combine` "builtin_lib.js")
 
 createGuard :: FilePath -> IO () -> IO ()
 createGuard out go = do
@@ -113,23 +113,24 @@ data JSMetaCtx = JSMetaCtx
   } deriving (Show, Eq, Data, Typeable)
 
 data JSTypeInfo = JSTypeInfo
-  { jstPrototype :: T.Text, jstName :: T.Text, jstHash :: [Word8], jstSize :: JSTSizeCtx
+  { jstPrototype :: T.Text
+  , jstConstructor :: T.Text
+  , jstName :: T.Text
+  , jstHash :: [Word8]
+  , jstSize :: JSTSizeCtx
   } deriving (Show, Eq, Data, Typeable)
 
-data JSBIClassification
-  = JSBIUnsigned
-  | JSBISigned
-  | JSBIFloat
-  | JSBIBool
+data JSBuiltIn
+  = JSU8 | JSU16 | JSU32 | JSU64
+  | JSS8 | JSS16 | JSS32 | JSS64
+  | JSF32 | JSF64
+  | JSCu8 | JSCu16 | JSCu32
+  | JSBool
   deriving (Show, Eq, Data, Typeable)
 
 data JSTypeCtx
-  = JSTBuiltIn
-      { jstDetail :: JSTypeInfo
-      , builtinWidth :: Integer
-      , builtinClassification :: JSBIClassification
-      }
-  | JSTSynonym { jstDetail :: JSTypeInfo }
+  = JSTBuiltIn { jstDetail :: JSTypeInfo, jstBIInstance :: JSBuiltIn }
+  | JSTSynonym { jstDetail :: JSTypeInfo, jstSynnedCtor :: T.Text }
   | JSTArray { jstDetail :: JSTypeInfo }
   | JSTVector { jstDetail :: JSTypeInfo }
   | JSTRecord { jstDetail :: JSTypeInfo }
@@ -154,13 +155,12 @@ mkJsCtx spec meta = JSCtx
 mkJsType :: Spec.SpType -> JSTypeCtx
 mkJsType t =
   case t of
-    Spec.BuiltIn { Spec.unBuiltIn = C.TBuiltIn b }
+    Spec.BuiltIn { Spec.unBuiltIn = (C.TBuiltIn b) }
       -> JSTBuiltIn { jstDetail = mkTypeInfo "builtin"
-                    , builtinWidth = Spec.maxSize t
-                    , builtinClassification = classify b
-                    }
-    Spec.Synonym {}
-      -> JSTSynonym { jstDetail = mkTypeInfo "synonym" }
+                    , jstBIInstance = biConv b }
+    Spec.Synonym { Spec.unSynonym = (C.TSynonym { C.synonymRepr = r } ) }
+      -> JSTSynonym { jstDetail = mkTypeInfo "synonym"
+                    , jstSynnedCtor = nameToConstructor (T.pack . show $ r)}
     Spec.Array {}
       -> JSTArray { jstDetail = mkTypeInfo "array" }
     Spec.Vector {}
@@ -178,22 +178,29 @@ mkJsType t =
         , jstHash = H.hashToBytes . Spec.spHash $ t
         , jstSize = JSTSizeCtx { jstMinSize = Spec.minSize t, jstMaxSize = Spec.maxSize t }
         , jstPrototype = p
+        , jstConstructor = nameToConstructor $ Spec.typeName t
         }
 
-    classify C.BIu8  = JSBIUnsigned
-    classify C.BIu16 = JSBIUnsigned
-    classify C.BIu32 = JSBIUnsigned
-    classify C.BIu64 = JSBIUnsigned
-    classify C.BIcu8 = JSBIUnsigned
-    classify C.BIcu16 = JSBIUnsigned
-    classify C.BIcu32 = JSBIUnsigned
-    classify C.BIs8 = JSBISigned
-    classify C.BIs16 = JSBISigned
-    classify C.BIs32 = JSBISigned
-    classify C.BIs64 = JSBISigned
-    classify C.BIf32 = JSBIFloat
-    classify C.BIf64 = JSBIFloat
-    classify C.BIbool = JSBIBool
+    biConv C.BIu8  = JSU8
+    biConv C.BIu16 = JSU16
+    biConv C.BIu32 = JSU32
+    biConv C.BIu64 = JSU64
+    biConv C.BIcu8 = JSCu8
+    biConv C.BIcu16 = JSCu16
+    biConv C.BIcu32 = JSCu32
+    biConv C.BIs8 = JSS8
+    biConv C.BIs16 = JSS16
+    biConv C.BIs32 = JSS32
+    biConv C.BIs64 = JSS64
+    biConv C.BIf32 = JSF32
+    biConv C.BIf64 = JSF64
+    biConv C.BIbool = JSBool
+
+nameToConstructor :: T.Text -> T.Text
+nameToConstructor n =
+  let parts = T.splitOn "_" n
+      caped = map T.toTitle parts
+  in T.concat caped
 
 renderTo :: Spec.Spec -> Meta.Meta -> FilePath -> FilePath -> IO ()
 renderTo spec meta templatePath destPath = do
@@ -204,7 +211,7 @@ renderTo spec meta templatePath destPath = do
   T.writeFile destPath rendered
   where
     mkCfg = do
-      tpath <- getDataFileName "templates/"
+      tpath <- getDataFileName "templates/sub"
       return $ defaultConfig { muEscapeFunc = id
                              , muTemplateFileDir = Just tpath } :: IO (MuConfig IO)
 

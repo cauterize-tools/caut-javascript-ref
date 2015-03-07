@@ -1,7 +1,7 @@
 /*global ArrayBuffer, Uint8Array, Uint16Array, Uint32Array */
 'use strict';
 
-var builtin = require('./builin.js');
+var builtin = require('./builtin_lib.js');
 
 function bytes1ToInt(u8array, offset) {
   return u8array[offset];
@@ -85,11 +85,30 @@ exports.DataInterface = function (info) {
     return t;
   };
 
-  /*
-  this.decodeAsType = function (typeName, offset) {
+  this.decodeMeta = function() {
+    var ml = this.metaLength();
+    var mt = this.metaType();
+    var offset = this.info.meta.getPayloadOffset();
+
+    if (ml + offset > this.data.length) {
+      throw new Error("Not enough data in buffer: " + this.data.length);
+    }
+
+    var ty = this.info.types.withTag(mt);
+    if (undefined === ty) {
+      throw new Error("Invalid type tag: " + mt.toString());
+    }
+
+    var ctor = ty.constructor;
+    console.error("CTOR", inst);
+    var inst = ctor.unpack(this.data, offset);
+    console.error("INST", inst.constructor.name);
+    console.error("INST", inst);
+
+    return inst;
   };
 
-  this.decodePayload = function () {
+  this.encodeMeta = function () {
+    return "";
   };
-  */
 };

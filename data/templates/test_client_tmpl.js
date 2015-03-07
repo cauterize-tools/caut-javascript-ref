@@ -14,6 +14,8 @@ process.stdin.on('readable', function () {
 });
 
 process.stdin.on('end', function () {
-  process.stderr.write("Data Length: " + dataInterface.metaLength().toString() + "\n");
-  process.stderr.write("Data Tag: " + dataInterface.metaType().toString() + "\n");
+  var t = dataInterface.decodeMeta();
+  var e = dataInterface.encodeMeta(t);
+
+  console.error(e);
 });

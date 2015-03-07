@@ -9,4 +9,5 @@
            --schema-count=1 \
            --instance-count=1 \
            --type-count=3 \
+           --prototypes=synonym \
            --enc-size=1024
