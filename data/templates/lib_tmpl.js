@@ -21,9 +21,10 @@ function MetaInfo() {
 /* Define all type information. */
 {{#jscTypes}}
 /* {{jstDetail.jstName}} */
+{{> jst_array_cstors_tmpl.js}}
 {{> jst_builtin_cstors_tmpl.js}}
 {{> jst_synonym_cstors_tmpl.js}}
-{{> jst_array_cstors_tmpl.js}}
+{{> jst_vector_cstors_tmpl.js}}
 {{jstDetail.jstConstructor}}.name = "{{jstDetail.jstName}}";
 {{jstDetail.jstConstructor}}.proto = '{{jstDetail.jstPrototype}}';
 {{jstDetail.jstConstructor}}.hash = [{{#jstDetail.jstHash}}{{.}},{{/jstDetail.jstHash}}];

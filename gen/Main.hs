@@ -134,7 +134,7 @@ data JSTypeCtx
   = JSTBuiltIn { jstDetail :: JSTypeInfo, jstBIInstance :: JSBuiltIn }
   | JSTSynonym { jstDetail :: JSTypeInfo, jstSynnedCtor :: T.Text }
   | JSTArray { jstDetail :: JSTypeInfo, jstArrayRefCtor :: T.Text, jstArrayLen :: Integer }
-  | JSTVector { jstDetail :: JSTypeInfo }
+  | JSTVector { jstDetail :: JSTypeInfo, jstVectorRefCtor :: T.Text, jstVectorMaxLen :: Integer, jstVectorLenWidth :: Integer  }
   | JSTRecord { jstDetail :: JSTypeInfo }
   | JSTCombination { jstDetail :: JSTypeInfo }
   | JSTUnion { jstDetail :: JSTypeInfo }
@@ -167,8 +167,12 @@ mkJsType t =
       -> JSTArray { jstDetail = mkTypeInfo "array"
                   , jstArrayRefCtor = nameToConstructor ar
                   , jstArrayLen = al }
-    Spec.Vector {}
-      -> JSTVector { jstDetail = mkTypeInfo "vector" }
+    Spec.Vector { Spec.unVector = (C.TVector { C.vectorRef = vr, C.vectorMaxLen = vml })
+                , Spec.lenRepr = (Spec.LengthRepr { Spec.unLengthRepr = lr } ) }
+      -> JSTVector { jstDetail = mkTypeInfo "vector"
+                   , jstVectorRefCtor = nameToConstructor vr
+                   , jstVectorMaxLen = vml
+                   , jstVectorLenWidth = C.builtInSize lr }
     Spec.Record {}
       -> JSTRecord { jstDetail = mkTypeInfo "record" }
     Spec.Combination {}
