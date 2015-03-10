@@ -1,6 +1,11 @@
 {{#JSTArray}}
 function {{jstDetail.jstConstructor}} (v) {
-  this.elems = v;
+  if (v.length > {{jstDetail.jstConstructor}}.arrayLength) {
+    throw new Error("Invalid array length: " + v.length);
+  } else {
+    this.elems = v;
+  }
+
   this.pack = function (cBuf) {
     var i; var len = cBuf.length();
     for (i = 0; i < {{jstDetail.jstConstructor}}.arrayLength; i++) {
