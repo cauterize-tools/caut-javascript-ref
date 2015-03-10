@@ -131,7 +131,7 @@ data JSBuiltIn
 data JSTypeCtx
   = JSTBuiltIn { jstDetail :: JSTypeInfo, jstBIInstance :: JSBuiltIn }
   | JSTSynonym { jstDetail :: JSTypeInfo, jstSynnedCtor :: T.Text }
-  | JSTArray { jstDetail :: JSTypeInfo }
+  | JSTArray { jstDetail :: JSTypeInfo, jstArrayRefCtor :: T.Text, jstArrayLen :: Integer }
   | JSTVector { jstDetail :: JSTypeInfo }
   | JSTRecord { jstDetail :: JSTypeInfo }
   | JSTCombination { jstDetail :: JSTypeInfo }
@@ -161,8 +161,10 @@ mkJsType t =
     Spec.Synonym { Spec.unSynonym = (C.TSynonym { C.synonymRepr = r } ) }
       -> JSTSynonym { jstDetail = mkTypeInfo "synonym"
                     , jstSynnedCtor = nameToConstructor (T.pack . show $ r)}
-    Spec.Array {}
-      -> JSTArray { jstDetail = mkTypeInfo "array" }
+    Spec.Array { Spec.unArray = (C.TArray { C.arrayRef = ar, C.arrayLen = al }) }
+      -> JSTArray { jstDetail = mkTypeInfo "array"
+                  , jstArrayRefCtor = nameToConstructor ar
+                  , jstArrayLen = al }
     Spec.Vector {}
       -> JSTVector { jstDetail = mkTypeInfo "vector" }
     Spec.Record {}
