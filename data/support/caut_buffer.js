@@ -120,7 +120,7 @@ function CautBuffer(initData) {
    * Return the length of the overall buffer. */
   this.length = function () {
     return this.buffers.map(function (v) { return v.length; })
-               .reduce(function (a, b) { return a + b; });
+               .reduce(function (a, b) { return a + b; }, 0);
   };
 
   /**
@@ -141,6 +141,8 @@ exports.CautBuffer = CautBuffer;
 
 /* Some built-in test code to be sure things are working as expected. */
 if (!module.parent) {
+  var assert = require('assert');
+
   var b;
   b = new CautBuffer(new Uint8Array([0,1,2]));
   b.addU8Array(new Uint8Array([3,4,5]));
@@ -148,17 +150,25 @@ if (!module.parent) {
   b.addU8(7);
   b.addU8Array(new Uint8Array([8,9,10,11,12,13,14,15]));
 
+  assert.equal(16, b.length());
+  assert.equal(0, b.position());
+
   var x;
   do {
     x = b.next();
   } while (x !== undefined);
 
+  assert.equal(16, b.position());
+  assert.equal(16, b.length());
+
   b.reset();
+
+  assert.equal(0, b.position());
 
   do {
     x = b.next();
   } while (x !== undefined);
 
-  console.log(b.allData());
+  assert.equal(16, b.position());
 }
 
