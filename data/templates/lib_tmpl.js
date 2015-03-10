@@ -23,6 +23,7 @@ function MetaInfo() {
 /* {{jstDetail.jstName}} */
 {{> jst_builtin_cstors_tmpl.js}}
 {{> jst_synonym_cstors_tmpl.js}}
+{{> jst_array_cstors_tmpl.js}}
 {{jstDetail.jstConstructor}}.name = "{{jstDetail.jstName}}";
 {{jstDetail.jstConstructor}}.proto = '{{jstDetail.jstPrototype}}';
 {{jstDetail.jstConstructor}}.hash = [{{#jstDetail.jstHash}}{{.}},{{/jstDetail.jstHash}}];
