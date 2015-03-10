@@ -33,6 +33,32 @@ function bytes4ToInt(u8array, offset) {
   return u32view[0];
 }
 
+function intToBytes1(val, u8array, offset) {
+  u8array[offset] = val;
+}
+
+function intToBytes2(val, u8array, offset) {
+  var buf = Uint16Array(1);
+  buf[0] = val;
+  var view = new Uint8Array(buf.buffer);
+
+  var i;
+  for (i = 0; i < 2; i++) {
+    u8array[offset + i] = view[i];
+  }
+}
+
+function intToBytes4(val, u8array, offset) {
+  var buf = Uint32Array(1);
+  buf[0] = val;
+  var view = new Uint8Array(buf.buffer);
+
+  var i;
+  for (i = 0; i < 4; i++) {
+    u8array[offset + i] = view[i];
+  }
+}
+
 exports.DataInterface = function (info) {
   // Store the specification/meta information
   this.info = info;
@@ -99,16 +125,45 @@ exports.DataInterface = function (info) {
       throw new Error("Invalid type tag: " + mt.toString());
     }
 
-    var ctor = ty.constructor;
-    console.error("CTOR", inst);
-    var inst = ctor.unpack(this.data, offset);
-    console.error("INST", inst.constructor.name);
-    console.error("INST", inst);
+    var inst = ty.unpack(this.data, offset);
 
     return inst;
   };
 
-  this.encodeMeta = function () {
-    return "";
+  this.encodeMeta = function (obj) {
+    var i;
+    var ctor = obj.constructor;
+
+    var lw = this.info.meta.getLengthWidth();
+    var tw = this.info.meta.getTypeWidth();
+    var offset = this.info.meta.getPayloadOffset();
+
+    // Create a buffer large enough for our type. Pack it into the buffer.
+    var objBuf = new Uint8Array(ctor.size.max);
+    var plen = obj.pack(objBuf, 0);
+
+    // Create a new buffer that's just large enough for the header and the
+    // payload. Copy the payload at the correct offset into the resized buffer.
+    var resizedBuf = new Uint8Array(offset + plen);
+    for (i = 0; i < plen; i++) {
+      resizedBuf[offset + i] = objBuf[i];
+    }
+
+    // Pack the length into the rezied buffer.
+    switch(lw) {
+      case 1: intToBytes1(plen, resizedBuf, 0); break;
+      case 2: intToBytes2(plen, resizedBuf, 0); break;
+      case 4: intToBytes4(plen, resizedBuf, 0); break;
+      case 8: throw new Error("Can't pack 64 bit length tags in JavaScript.");
+      default:
+        throw new Error("Invalid meta length width: " + lw.toString());
+    }
+
+    // Pack the tag into the resized buffer.
+    for (i = 0; i < tw; i++) {
+      resizedBuf[lw + i] = ctor.hash[i];
+    }
+
+    return resizedBuf;
   };
 };

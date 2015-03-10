@@ -18,21 +18,24 @@ function MetaInfo() {
 }
 {{/jscMeta}}
 
+/* Define all type information. */
 {{#jscTypes}}
+/* {{jstDetail.jstName}} */
 {{> jst_builtin_cstors_tmpl.js}}
 {{> jst_synonym_cstors_tmpl.js}}
+{{jstDetail.jstConstructor}}.name = "{{jstDetail.jstName}}";
+{{jstDetail.jstConstructor}}.proto = '{{jstDetail.jstPrototype}}';
+{{jstDetail.jstConstructor}}.hash = [{{#jstDetail.jstHash}}{{.}},{{/jstDetail.jstHash}}];
+{{jstDetail.jstConstructor}}.size = { min: {{jstDetail.jstSize.jstMinSize}}, max: {{jstDetail.jstSize.jstMaxSize}} };
+Object.freeze({{jstDetail.jstConstructor}});
+exports.{{jstDetail.jstConstructor}} = {{jstDetail.jstConstructor}};
+
 {{/jscTypes}}
 
 function TypeInfo() {
   this.types = {
 {{#jscTypes}}
-    '{{jstDetail.jstName}}': {
-      name: '{{jstDetail.jstName}}',
-      proto: '{{jstDetail.jstPrototype}}',
-      hash: [{{#jstDetail.jstHash}}{{.}},{{/jstDetail.jstHash}}],
-      size: { min: {{jstDetail.jstSize.jstMinSize}}, max: {{jstDetail.jstSize.jstMaxSize}} },
-      constructor: {{jstDetail.jstConstructor}},
-    },
+    '{{jstDetail.jstName}}': {{jstDetail.jstConstructor}},
 {{/jscTypes}}
   };
 
@@ -50,20 +53,14 @@ function TypeInfo() {
     };
 
     var i;
-    for (var key in this.types) {
-      if (prefixMatches(this.types[key].hash)) {
-        return this.types[key];
+    for (var tyName in this.types) {
+      if (prefixMatches(this.types[tyName].hash)) {
+        return this.types[tyName];
       }
     }
 
     return undefined;
   };
-}
-
-function packMeta(t) {
-}
-
-function unpackMeta(u8buf) {
 }
 
 exports.CautInfo = function () {

@@ -59,10 +59,11 @@ function unpack64(ctor, u8buf, offset) {
 }
 
 function pack(obj, u8buf, offset) {
+  var safeOffset = offset || 0;
   var view = obj.constructor.view;
   var width = obj.constructor.width;
 
-  if (width + offset > u8buf.byteLength) {
+  if (width + safeOffset > u8buf.byteLength) {
     throw new Error("Insufficient bytes: " + u8buf.byteLength.toString());
   }
 
@@ -73,14 +74,16 @@ function pack(obj, u8buf, offset) {
   v[0] = obj.value;
 
   var i; for (i = 0; i < width; i++) {
-    u8buf[i] = bv[i];
+    u8buf[safeOffset + i] = bv[i];
   }
 
   return width;
 }
 
 function pack64(obj, u8buf, offset) {
-  if (8 + offset > u8buf.byteLength) {
+  var safeOffset = offset || 0;
+
+  if (8 + safeOffset > u8buf.byteLength) {
     throw new Error("Insufficient bytes: " + u8buf.byteLength.toString());
   }
 
@@ -92,7 +95,7 @@ function pack64(obj, u8buf, offset) {
   v[1] = obj.v1;
 
   var i; for (i = 0; i < 8; i++) {
-    u8buf[i] = bv[i];
+    u8buf[safeOffset + i] = bv[i];
   }
 
   return 8;

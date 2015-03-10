@@ -6,8 +6,8 @@
 ./.cabal-sandbox/bin/cauterize-test \
   crucible --build-cmd="../../.cabal-sandbox/bin/caut-javascript-ref-gen --spec=%s --meta=%m --output=js" \
            --run-cmd="node js/test_client.js" \
-           --schema-count=1 \
-           --instance-count=1 \
-           --type-count=3 \
+           --schema-count=10 \
+           --instance-count=100 \
+           --type-count=30 \
            --prototypes=synonym \
            --enc-size=1024

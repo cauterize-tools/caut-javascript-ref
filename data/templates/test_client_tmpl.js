@@ -18,4 +18,5 @@ process.stdin.on('end', function () {
   var e = dataInterface.encodeMeta(t);
 
   console.error(e);
+  process.stdout.write(new Buffer(e));
 });
