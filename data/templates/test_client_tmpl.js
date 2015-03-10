@@ -18,7 +18,6 @@ process.stdin.on('end', function () {
 
   var t = di.decodeMeta();
   var e = di.encodeMeta(t);
-  console.error(e);
 
   process.stdout.write(new Buffer(e));
 });
