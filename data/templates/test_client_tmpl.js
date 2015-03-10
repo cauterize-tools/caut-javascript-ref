@@ -2,21 +2,23 @@
 
 var lib = require('./lib{{jscLibName}}.js');
 var c = require('./cauterize.js');
+var cb = require('./caut_buffer.js');
 
-var dataInterface = new c.DataInterface(new lib.CautInfo());
+var buf = new cb.CautBuffer();
 
 process.stdin.on('readable', function () {
   var chunk = process.stdin.read();
   if (null !== chunk) {
-    var buf = new Uint8Array(chunk);
-    dataInterface.addData(buf);
+    buf.addU8Array(new Uint8Array(chunk));
   }
 });
 
 process.stdin.on('end', function () {
-  var t = dataInterface.decodeMeta();
-  var e = dataInterface.encodeMeta(t);
+  var di = new c.DataInterface(new lib.CautInfo(), buf);
 
+  var t = di.decodeMeta();
+  var e = di.encodeMeta(t);
   console.error(e);
+
   process.stdout.write(new Buffer(e));
 });

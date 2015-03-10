@@ -87,8 +87,10 @@ generateOutput spec meta out = do
     copyFiles = do
       ca <- getDataFileName "support/cauterize.js"
       bi <- getDataFileName "support/builtin_lib.js"
+      cb <- getDataFileName "support/caut_buffer.js"
       copyFile ca (out `combine` "cauterize.js")
       copyFile bi (out `combine` "builtin_lib.js")
+      copyFile cb (out `combine` "caut_buffer.js")
 
 createGuard :: FilePath -> IO () -> IO ()
 createGuard out go = do

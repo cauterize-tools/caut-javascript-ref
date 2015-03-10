@@ -1,12 +1,12 @@
 {{#JSTArray}}
 function {{jstDetail.jstConstructor}} (v) {
   this.value = v;
-  this.pack = function (u8buf, offset) {
-    var i; var pos = 0;
+  this.pack = function (cBuf) {
+    var i; var pos = cBuf.position();
     for (i = 0; i < this.constructor.arrayLength; i++) {
-      pos += v[i].pack(u8buf, offset + pos);
+      v[i].pack(cBuf);
     }
-    return pos;
+    return cBuf.position() - pos;
   };
 }
 {{jstDetail.jstConstructor}}.unpack = function (u8buf, offset) {
