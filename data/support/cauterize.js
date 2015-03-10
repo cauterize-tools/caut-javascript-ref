@@ -4,52 +4,44 @@
 var builtin = require('./builtin_lib.js');
 var cb = require('./caut_buffer.js');
 
-function bytes1ToInt(cBuf) {
-  return cBuf.nextE();
+/* Returns a constructor for a view of the provided size. */
+function viewOfSize(sz) {
+  var view;
+
+  switch (sz) {
+    case 1: view = Uint8Array; break;
+    case 2: view = Uint16Array; break;
+    case 4: view = Uint32Array; break;
+    case 8: throw new Error("Can't unpack 64 bit length tags in JavaScript.");
+    default: throw new Error("Invalid meta length width: " + sz.toString());
+  }
+
+  return view;
 }
 
-function bytes2ToInt(cBuf) {
-  var sz = 2;
+/* Converts `sz` bytes from `cBuf` into an unsinged value. */
+function bytesToInt(cBuf, sz) {
+  var view = viewOfSize(sz);
+
   var buf = new ArrayBuffer(sz);
   var u8view = new Uint8Array(buf);
-  var u16view = new Uint16Array(buf);
+  var dataView = new view(buf);
 
   var i; for (i = 0; i < sz; i++) {
     u8view[i] = cBuf.nextE();
   }
 
-  return u16view[0];
+  return dataView[0];
 }
 
-function bytes4ToInt(cBuf) {
-  var sz = 4;
-  var buf = new ArrayBuffer(sz);
-  var u8view = new Uint8Array(buf);
-  var u32view = new Uint32Array(buf);
+/* Converts `val` into `sz` bytes appended to `cBuf`. */
+function intToBytes(val, cBuf, sz) {
+  var view = viewOfSize(sz);
 
-  var i; for (i = 0; i < sz; i++) {
-    u8view[i] = cBuf.nextE();
-  }
-
-  return u32view[0];
-}
-
-function intToBytes1(val, cBuf) {
-  cBuf.addU8(val);
-}
-
-function intToBytes2(val, cBuf) {
-  var buf = Uint16Array(1);
+  var buf = new view(1);
   buf[0] = val;
-  var view = new Uint8Array(buf.buffer);
-  cBuf.addU8Array(view);
-}
-
-function intToBytes4(val, cBuf) {
-  var buf = Uint32Array(1);
-  buf[0] = val;
-  var view = new Uint8Array(buf.buffer);
-  cBuf.addU8Array(view);
+  var bView = new Uint8Array(buf.buffer);
+  cBuf.addU8Array(bView);
 }
 
 exports.DataInterface = function (info, buffer) {
@@ -57,14 +49,7 @@ exports.DataInterface = function (info, buffer) {
 
   function readMetaLength() {
     var lw = self.info.meta.getLengthWidth();
-    switch(lw) {
-      case 1: return bytes1ToInt(self.buffer);
-      case 2: return bytes2ToInt(self.buffer);
-      case 4: return bytes4ToInt(self.buffer);
-      case 8: throw new Error("Can't unpack 64 bit length tags in JavaScript.");
-      default:
-        throw new Error("Invalid meta length width: " + lw.toString());
-    }
+    return bytesToInt(self.buffer, lw);
   }
 
   function readMetaType() {
@@ -114,14 +99,7 @@ exports.DataInterface = function (info, buffer) {
 
     // Pack the meta header into a CautBuffer.
     var hBuf = new cb.CautBuffer();
-    switch(lw) {
-      case 1: intToBytes1(plen, hBuf); break;
-      case 2: intToBytes2(plen, hBuf); break;
-      case 4: intToBytes4(plen, hBuf); break;
-      case 8: throw new Error("Can't pack 64 bit length tags in JavaScript.");
-      default:
-        throw new Error("Invalid meta length width: " + lw.toString());
-    }
+    intToBytes(plen, hBuf, lw);
 
     // Pack the tag into the resized buffer.
     for (i = 0; i < tw; i++) {
