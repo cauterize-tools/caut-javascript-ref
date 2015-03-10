@@ -88,7 +88,6 @@ exports.DataInterface = function (info, buffer) {
   this.decodeMeta = function() {
     var rem = this.buffer.remaining();
     if (this.metaLength > rem) {
-      console.error(this.metaLength, this.metaType);
       throw new Error("Not enough data in buffer: " + rem);
     }
 
