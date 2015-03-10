@@ -6,8 +6,8 @@ function {{jstDetail.jstConstructor}} (v) {
   };
 }
 {{jstDetail.jstConstructor}}.unpack = function (u8buf, offset) {
-  var biVal = {{jstSynnedCtor}}.unpack(u8buf, offset);
+  var biVal = this.refTypeCtor.unpack(u8buf, offset);
   return new {{jstDetail.jstConstructor}}(biVal);
 };
-
+{{jstDetail.jstConstructor}}.refTypeCtor = {{jstSynnedCtor}};
 {{/JSTSynonym}}
