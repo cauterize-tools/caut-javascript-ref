@@ -97,7 +97,8 @@ exports.DataInterface = function (info, buffer) {
 
     // Pack the object into a CautBuffer.
     var oBuf = new cb.CautBuffer();
-    var plen = obj.pack(oBuf);
+    obj.pack(oBuf);
+    var plen = oBuf.length();
 
     // Pack the meta header into a CautBuffer.
     var hBuf = new cb.CautBuffer();
