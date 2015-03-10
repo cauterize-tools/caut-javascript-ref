@@ -33,6 +33,7 @@ function bytesToInt(cBuf, sz) {
 
   return dataView[0];
 }
+exports.bytesToInt = bytesToInt;
 
 /* Converts `val` into `sz` bytes appended to `cBuf`. */
 function intToBytes(val, cBuf, sz) {
@@ -43,6 +44,7 @@ function intToBytes(val, cBuf, sz) {
   var bView = new Uint8Array(buf.buffer);
   cBuf.addU8Array(bView);
 }
+exports.intToBytes = intToBytes;
 
 exports.DataInterface = function (info, buffer) {
   var self = this;
