@@ -1,13 +1,10 @@
 #!/bin/sh
 
-# This is what John uses to test the caut-c11-sync generator locally. You may
-# need to tweak this to fit your local configuration.
-
 ./.cabal-sandbox/bin/cauterize-test \
   crucible --build-cmd="../../.cabal-sandbox/bin/caut-javascript-ref-gen --spec=%s --meta=%m --output=js" \
            --run-cmd="node js/test_client.js" \
-           --schema-count=10 \
-           --instance-count=100 \
-           --type-count=30 \
-           --prototypes=synonym \
+           --schema-count=1 \
+           --instance-count=50 \
+           --type-count=50 \
+           --prototypes=synonym,array,vector,record \
            --enc-size=1024

@@ -130,12 +130,21 @@ data JSBuiltIn
   | JSBool
   deriving (Show, Eq, Data, Typeable)
 
+data JSTFieldInfo = JSTDataField
+                    { jstdfName :: T.Text
+                    , jstdfIndex :: Integer
+                    , jstdfRefCtor :: T.Text }
+                  | JSTEmptyField
+                    { jstefName :: T.Text
+                    , jstefIndex :: Integer }
+  deriving (Show, Eq, Data, Typeable)
+
 data JSTypeCtx
   = JSTBuiltIn { jstDetail :: JSTypeInfo, jstBIInstance :: JSBuiltIn }
   | JSTSynonym { jstDetail :: JSTypeInfo, jstSynnedCtor :: T.Text }
   | JSTArray { jstDetail :: JSTypeInfo, jstArrayRefCtor :: T.Text, jstArrayLen :: Integer }
   | JSTVector { jstDetail :: JSTypeInfo, jstVectorRefCtor :: T.Text, jstVectorMaxLen :: Integer, jstVectorLenWidth :: Integer  }
-  | JSTRecord { jstDetail :: JSTypeInfo }
+  | JSTRecord { jstDetail :: JSTypeInfo, jstRecordFields :: [JSTFieldInfo] }
   | JSTCombination { jstDetail :: JSTypeInfo }
   | JSTUnion { jstDetail :: JSTypeInfo }
   deriving (Show, Eq, Data, Typeable)
@@ -173,8 +182,9 @@ mkJsType t =
                    , jstVectorRefCtor = nameToConstructor vr
                    , jstVectorMaxLen = vml
                    , jstVectorLenWidth = C.builtInSize lr }
-    Spec.Record {}
-      -> JSTRecord { jstDetail = mkTypeInfo "record" }
+    Spec.Record { Spec.unRecord = (C.TRecord { C.recordFields = C.Fields rfs }) }
+      -> JSTRecord { jstDetail = mkTypeInfo "record"
+                   , jstRecordFields = map mkFieldInfo rfs }
     Spec.Combination {}
       -> JSTCombination { jstDetail = mkTypeInfo "combination" }
     Spec.Union {}
@@ -188,6 +198,11 @@ mkJsType t =
         , jstPrototype = p
         , jstConstructor = nameToConstructor $ Spec.typeName t
         }
+
+    mkFieldInfo C.Field { C.fName = n, C.fRef = r, C.fIndex = i } =
+      JSTDataField { jstdfName = n, jstdfRefCtor = nameToConstructor r, jstdfIndex = i }
+    mkFieldInfo C.EmptyField { C.fName = n, C.fIndex = i } =
+      JSTEmptyField { jstefName = n, jstefIndex = i }
 
     biConv C.BIu8  = JSU8
     biConv C.BIu16 = JSU16
