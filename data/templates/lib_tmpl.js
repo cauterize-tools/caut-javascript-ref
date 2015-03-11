@@ -23,6 +23,7 @@ function MetaInfo() {
 /* {{jstDetail.jstName}} */
 {{> jst_array_cstors_tmpl.js}}
 {{> jst_builtin_cstors_tmpl.js}}
+{{> jst_combination_cstors_tmpl.js}}
 {{> jst_record_cstors_tmpl.js}}
 {{> jst_synonym_cstors_tmpl.js}}
 {{> jst_vector_cstors_tmpl.js}}

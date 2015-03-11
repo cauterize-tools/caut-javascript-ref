@@ -145,7 +145,7 @@ data JSTypeCtx
   | JSTArray { jstDetail :: JSTypeInfo, jstArrayRefCtor :: T.Text, jstArrayLen :: Integer }
   | JSTVector { jstDetail :: JSTypeInfo, jstVectorRefCtor :: T.Text, jstVectorMaxLen :: Integer, jstVectorLenWidth :: Integer  }
   | JSTRecord { jstDetail :: JSTypeInfo, jstRecordFields :: [JSTFieldInfo] }
-  | JSTCombination { jstDetail :: JSTypeInfo }
+  | JSTCombination { jstDetail :: JSTypeInfo, jstCombinationFields :: [JSTFieldInfo], jstCombinationFlagsWidth :: Integer }
   | JSTUnion { jstDetail :: JSTypeInfo }
   deriving (Show, Eq, Data, Typeable)
 
@@ -185,8 +185,11 @@ mkJsType t =
     Spec.Record { Spec.unRecord = (C.TRecord { C.recordFields = C.Fields rfs }) }
       -> JSTRecord { jstDetail = mkTypeInfo "record"
                    , jstRecordFields = map mkFieldInfo rfs }
-    Spec.Combination {}
-      -> JSTCombination { jstDetail = mkTypeInfo "combination" }
+    Spec.Combination { Spec.unCombination = (C.TCombination { C.combinationFields = C.Fields cfs })
+                     , Spec.flagsRepr = (Spec.FlagsRepr fr) }
+      -> JSTCombination { jstDetail = mkTypeInfo "combination"
+                        , jstCombinationFields = map mkFieldInfo cfs
+                        , jstCombinationFlagsWidth = C.builtInSize fr }
     Spec.Union {}
       -> JSTUnion { jstDetail = mkTypeInfo "union" }
   where

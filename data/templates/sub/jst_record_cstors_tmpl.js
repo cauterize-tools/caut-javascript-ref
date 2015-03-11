@@ -37,8 +37,6 @@ function {{jstDetail.jstConstructor}} (fs) {
       }
     }
 
-    console.error(fs);
-
     return new {{jstDetail.jstConstructor}}(fs);
 };
 {{jstDetail.jstConstructor}}.fields = [
