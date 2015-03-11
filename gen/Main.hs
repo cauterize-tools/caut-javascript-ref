@@ -146,7 +146,7 @@ data JSTypeCtx
   | JSTVector { jstDetail :: JSTypeInfo, jstVectorRefCtor :: T.Text, jstVectorMaxLen :: Integer, jstVectorLenWidth :: Integer  }
   | JSTRecord { jstDetail :: JSTypeInfo, jstRecordFields :: [JSTFieldInfo] }
   | JSTCombination { jstDetail :: JSTypeInfo, jstCombinationFields :: [JSTFieldInfo], jstCombinationFlagsWidth :: Integer }
-  | JSTUnion { jstDetail :: JSTypeInfo }
+  | JSTUnion { jstDetail :: JSTypeInfo, jstUnionFields :: [JSTFieldInfo], jstUnionTagWidth :: Integer }
   deriving (Show, Eq, Data, Typeable)
 
 data JSTSizeCtx = JSTSizeCtx { jstMinSize :: Integer, jstMaxSize :: Integer }
@@ -190,8 +190,11 @@ mkJsType t =
       -> JSTCombination { jstDetail = mkTypeInfo "combination"
                         , jstCombinationFields = map mkFieldInfo cfs
                         , jstCombinationFlagsWidth = C.builtInSize fr }
-    Spec.Union {}
-      -> JSTUnion { jstDetail = mkTypeInfo "union" }
+    Spec.Union { Spec.unUnion = (C.TUnion { C.unionFields = C.Fields ufs })
+               , Spec.tagRepr = (Spec.TagRepr tr) }
+      -> JSTUnion { jstDetail = mkTypeInfo "union"
+                  , jstUnionFields = map mkFieldInfo ufs
+                  , jstUnionTagWidth = C.builtInSize tr }
   where
     mkTypeInfo p =
       JSTypeInfo
