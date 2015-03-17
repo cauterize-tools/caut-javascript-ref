@@ -40,6 +40,7 @@ function someBytes(cBuf, sz) {
 
   return bytes;
 }
+exports.someBytes = someBytes;
 
 function bytesToInt(cBuf, sz) {
   var view = viewOfSize(sz);
@@ -54,6 +55,7 @@ function bytesToInt(cBuf, sz) {
 
   return dataView[0];
 }
+exports.bytesToInt = bytesToInt;
 
 function intToBytes(cBuf, val, sz) {
   var view = viewOfSize(sz);
@@ -62,5 +64,8 @@ function intToBytes(cBuf, val, sz) {
   buf[0] = val;
   var bView = new Uint8Array(buf.buffer);
   cBuf.addU8Array(bView);
+
+  return sz;
 }
+exports.intToBytes = intToBytes;
 

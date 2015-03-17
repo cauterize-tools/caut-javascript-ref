@@ -3,10 +3,14 @@
 var ctype = require('./ctype.js');
 
 function CArray(elements) {
+  if (elements.length !== this.constructor.elemLength) {
+    throw new Error("Unexpected number of elements. Expected " + this.constructor.elemLength.toString() +
+                    " but got " + elements.length.toString());
+  }
+
   this.elements = elements;
 }
 CArray.prototype = Object.create(ctype.CType.prototype);
-
 CArray.prototype.cautproto = 'array';
 CArray.prototype.pack = function (cautBuffer) {
   var i, sum = 0;
