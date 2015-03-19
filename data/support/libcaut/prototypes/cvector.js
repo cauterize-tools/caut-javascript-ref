@@ -33,11 +33,12 @@ CVector.prototype.toJS = function () {
 
   return jsElems;
 };
+exports.CVector = CVector;
 
-CVector.unpack = function (vectorCtor, cautBuffer) {
+function unpack(vectorCtor, cautBuffer) {
   var elemLength = cast.bytesToInt(cautBuffer, vectorCtor.lengthWidth);
 
-  if (elemLength > this.constructor.elemMaxLength) {
+  if (elemLength > vectorCtor.elemMaxLength) {
     throw new Error("Unexpected vector length: " + elemLength.toString());
   }
 
@@ -48,8 +49,7 @@ CVector.unpack = function (vectorCtor, cautBuffer) {
   }
 
   return new vectorCtor(elems);
-};
-exports.CVector = CVector;
+}
 
 function mkVector(f, typename, elemType, elemMaxLength, lengthWidth, hash, size) {
   ctype.mkCType(f, typename, 'vector', hash, size);
@@ -61,7 +61,7 @@ function mkVector(f, typename, elemType, elemMaxLength, lengthWidth, hash, size)
   f.prototype.constructor = f;
 
   f.unpack = function (cautBuffer) {
-    return CVector.unpack(f, cautBuffer);
+    return unpack(f, cautBuffer);
   };
 }
 exports.mkVector = mkVector;

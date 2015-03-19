@@ -18,13 +18,12 @@ CSynonym.prototype.pack = function (cautBuffer) {
 CSynonym.prototype.toJS = function () {
   return this.value.toJS();
 };
+exports.CSynonym = CSynonym;
 
-CSynonym.unpack = function (synCtor, cautBuffer) {
+function unpack(synCtor, cautBuffer) {
   var value = synCtor.synType.unpack(cautBuffer);
   return new synCtor(value);
-};
-
-exports.CSynonym = CSynonym;
+}
 
 function mkSyn(f, typename, synType, hash, size) {
   ctype.mkCType(f, typename, 'synonym', hash, size);
@@ -33,7 +32,7 @@ function mkSyn(f, typename, synType, hash, size) {
   f.prototype.constructor = f;
 
   f.unpack = function (cautBuffer) {
-    return CSynonym.unpack(f, cautBuffer);
+    return unpack(f, cautBuffer);
   };
 
   f.synType = synType;

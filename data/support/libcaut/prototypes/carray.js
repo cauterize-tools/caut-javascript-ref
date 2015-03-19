@@ -29,8 +29,9 @@ CArray.prototype.toJS = function () {
 
   return jsElems;
 };
+exports.CArray = CArray;
 
-CArray.unpack = function (arrayCtor, cautBuffer) {
+function unpack(arrayCtor, cautBuffer) {
   var i, elems = [];
 
   for (i = 0; i < arrayCtor.elemLength; i++) {
@@ -38,8 +39,7 @@ CArray.unpack = function (arrayCtor, cautBuffer) {
   }
 
   return new arrayCtor(elems);
-};
-exports.CArray = CArray;
+}
 
 function mkArray(f, typename, elemType, length, hash, size) {
   ctype.mkCType(f, typename, 'array', hash, size);
@@ -50,7 +50,7 @@ function mkArray(f, typename, elemType, length, hash, size) {
   f.prototype.constructor = f;
 
   f.unpack = function (cautBuffer) {
-    return CArray.unpack(f, cautBuffer);
+    return unpack(f, cautBuffer);
   };
 }
 exports.mkArray = mkArray;

@@ -33,7 +33,10 @@ CBuiltIn.prototype.toJS = function () {
   return this.fromBytes(this.buffer);
 };
 
-CBuiltIn.unpack = function (biCtor, cautBuffer) {
+Object.freeze(CBuiltIn);
+exports.CBuiltIn = CBuiltIn;
+
+function unpack(biCtor, cautBuffer) {
   var width = biCtor.width;
   var ab = new Uint8Array(width);
 
@@ -42,10 +45,7 @@ CBuiltIn.unpack = function (biCtor, cautBuffer) {
   }
 
   return new biCtor(ab.buffer);
-};
-
-Object.freeze(CBuiltIn);
-exports.CBuiltIn = CBuiltIn;
+}
 
 function u8ToJs(ab)  { return new Uint8Array(ab)[0]; }
 function u16ToJs(ab) { return new Uint16Array(ab)[0]; }
@@ -74,7 +74,7 @@ function ebi(f, width, toJS) {
   f.prototype.fromBytes = toJS;
 
   f.unpack = function (cautBuffer) {
-    return CBuiltIn.unpack(f, cautBuffer);
+    return unpack(f, cautBuffer);
   };
 
   f.width = width;
