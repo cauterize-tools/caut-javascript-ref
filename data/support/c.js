@@ -6,6 +6,7 @@ var syn = require('./libcaut/prototypes/csynonym.js');
 var arr = require('./libcaut/prototypes/carray.js');
 var vec = require('./libcaut/prototypes/cvector.js');
 var rec = require('./libcaut/prototypes/crecord.js');
+var comb = require('./libcaut/prototypes/ccombination.js');
 var cb = require('./libcaut/buffer.js');
 
 var data = new ArrayBuffer(8);
@@ -162,4 +163,31 @@ rec.mkRecord(Rec, "rec", recfields, [1,2,3], {min:3, max:3});
   assert.equal(10,  ad[0]);
   assert.equal(100, ad[1]);
   assert.equal(200, ad[2]);
+}());
+
+function Comb(fields) { rec.CRecord.call(this, fields); }
+var combfields = [ { name: "a", index: 0, ctor: U8 },
+                   { name: "b", index: 1, ctor: U8 },
+                   { name: "c", index: 2, ctor: U8 } ];
+comb.mkCombination(Comb, "comb", combfields, 1, [1,2,3], {min:1, max:4});
+
+(function () {
+  var combdata = new Uint8Array([5, 10, 200]);
+  var buffer = new cb.CautBuffer();
+  buffer.addU8Array(combdata);
+
+  var com = Comb.unpack(buffer);
+  var js = com.toJS();
+
+  assert.equal(10,  js.a);
+  assert.equal(undefined, js.b);
+  assert.equal(200, js.c);
+
+  delete com.fields.a;
+
+  var pb = new cb.CautBuffer();
+  com.pack(pb);
+  var ad = pb.allData();
+  assert.equal(4,  ad[0]);
+  assert.equal(200, ad[1]);
 }());
