@@ -1,8 +1,9 @@
-// test_client.js
+/*global Uint8Array */
+'use strict';
 
 var lib = require('./lib{{jscLibName}}.js');
-var c = require('./cauterize.js');
-var cb = require('./caut_buffer.js');
+var c = require('./libcaut/cauterize.js');
+var cb = require('./libcaut/buffer.js');
 
 var buf = new cb.CautBuffer();
 
@@ -14,10 +15,14 @@ process.stdin.on('readable', function () {
 });
 
 process.stdin.on('end', function () {
-  var di = new c.DataInterface(new lib.CautInfo(), buf);
+  var clib = new c.Cauterize(lib.SpecificationInfo);
 
-  var t = di.decodeMeta();
-  var e = di.encodeMeta(t);
+  var t = clib.decode(buf);
 
-  process.stdout.write(new Buffer(e));
+  var e = clib.encode(t);
+  var ad = e.allData();
+
+  console.error("ALL DATA", ad);
+
+  process.stdout.write(new Buffer(ad));
 });

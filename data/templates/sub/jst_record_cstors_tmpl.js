@@ -4,14 +4,14 @@ function {{jstDetail.jstConstructor}}(elems) { prot.CRecord.call(this, elems); }
   var typeHash = [{{#jstDetail.jstHash}}{{.}},{{/jstDetail.jstHash}}];
   var typeSize = { min: {{jstDetail.jstSize.jstMinSize}}, max: {{jstDetail.jstSize.jstMaxSize}} };
   var fields = [
-  {{#jstRecordFields}}
-  {{#JSTDataField}}
+{{#jstRecordFields}}
+{{#JSTDataField}}
       { name: "{{jstdfName}}", index: {{jstdfIndex}}, ref: {{jstdfRefCtor}} },
-  {{/JSTDataField}}
-  {{#JSTEmptyField}}
+{{/JSTDataField}}
+{{#JSTEmptyField}}
       { name: "{{jstefName}}", index: {{jstefIndex}} },
-  {{/JSTEmptyField}}
-  {{/jstRecordFields}}
+{{/JSTEmptyField}}
+{{/jstRecordFields}}
     ];
   prot.mkRecord({{jstDetail.jstConstructor}}, '{{jstName}}', fields, typeHash, typeSize);
 }());

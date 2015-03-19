@@ -47,7 +47,11 @@ function unpack(unionCtor, cautBuffer) {
   for (fieldIx = 0; fieldIx < unionCtor.fields.length; fieldIx++) {
     cfield = unionCtor.fields[fieldIx];
     if (tag === cfield.index) {
-      obj[cfield.name] = cfield.ctor.unpack(cautBuffer);
+      if (undefined !== cfield.ref) {
+        obj[cfield.name] = cfield.ref.unpack(cautBuffer);
+      } else {
+        obj[cfield.name] = null;
+      }
       return new unionCtor(obj);
     }
   }

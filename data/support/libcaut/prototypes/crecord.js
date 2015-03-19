@@ -15,7 +15,7 @@ CRecord.prototype.pack = function (cautBuffer) {
     cfield = this.constructor.fields[fieldIx];
     tfield = this.fields[cfield.name];
 
-    if (undefined !== cfield.ctor) {
+    if (undefined !== cfield.ref) {
       sum += tfield.pack(cautBuffer);
     }
   }
@@ -30,7 +30,7 @@ CRecord.prototype.toJS = function () {
     cfield = this.constructor.fields[fieldIx];
     tfield = this.fields[cfield.name];
 
-    if (undefined !== cfield.ctor) {
+    if (undefined !== cfield.ref) {
       jsFields[cfield.name] = tfield.toJS();
     } else {
       jsFields[cfield.name] = null;
@@ -47,7 +47,7 @@ function unpack(recordCtor, cautBuffer) {
 
   for (fieldIx = 0; fieldIx < recordCtor.fields.length; fieldIx++) {
     cfield = recordCtor.fields[fieldIx];
-    fields[cfield.name] = cfield.ctor.unpack(cautBuffer);
+    fields[cfield.name] = cfield.ref.unpack(cautBuffer);
   }
 
   return new recordCtor(fields);

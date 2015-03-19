@@ -136,9 +136,9 @@ prot.mkVector(VecU8, 'vec_u8', U8, 5, 1, [1,2,3], {min: 1, max: 6});
 }());
 
 function Rec(fields) { prot.CRecord.call(this, fields); }
-var recfields = [ { name: "a", index: 0, ctor: U8 },
-                  { name: "b", index: 1, ctor: U8 },
-                  { name: "c", index: 2, ctor: U8 } ];
+var recfields = [ { name: "a", index: 0, ref: U8 },
+                  { name: "b", index: 1, ref: U8 },
+                  { name: "c", index: 2, ref: U8 } ];
 prot.mkRecord(Rec, "rec", recfields, [1,2,3], {min:3, max:3});
 
 (function () {
@@ -162,9 +162,9 @@ prot.mkRecord(Rec, "rec", recfields, [1,2,3], {min:3, max:3});
 }());
 
 function Comb(fields) { prot.CCombination.call(this, fields); }
-var combfields = [ { name: "a", index: 0, ctor: U8 },
-                   { name: "b", index: 1, ctor: U8 },
-                   { name: "c", index: 2, ctor: U8 } ];
+var combfields = [ { name: "a", index: 0, ref: U8 },
+                   { name: "b", index: 1, ref: U8 },
+                   { name: "c", index: 2, ref: U8 } ];
 prot.mkCombination(Comb, "comb", combfields, 1, [1,2,3], {min:1, max:4});
 
 (function () {
@@ -189,8 +189,8 @@ prot.mkCombination(Comb, "comb", combfields, 1, [1,2,3], {min:1, max:4});
 }());
 
 function Uni(field) { prot.CUnion.call(this,field); }
-var unifields = [ { name: "a", index: 0, ctor: U8 },
-                  { name: "b", index: 1, ctor: U32 } ];
+var unifields = [ { name: "a", index: 0, ref: U8 },
+                  { name: "b", index: 1, ref: U32 } ];
 prot.mkUnion(Uni, "uni", unifields, 1, [1,2,3], {min:2, max:5});
 
 (function () {

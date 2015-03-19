@@ -33,6 +33,7 @@ TypeDict.prototype.typeWithHashPrefixE = function (prefix) {
     return true;
   }
 
+
   var tyName;
   for (tyName in this.types) {
     if (this.types.hasOwnProperty(tyName)) {
@@ -45,3 +46,4 @@ TypeDict.prototype.typeWithHashPrefixE = function (prefix) {
   throw new Error("Could not find type with prefix: " + prefix.toString());
 };
 
+exports.TypeDict = TypeDict;

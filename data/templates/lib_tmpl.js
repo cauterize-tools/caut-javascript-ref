@@ -2,22 +2,6 @@
 
 var prot = require('./libcaut/prototypes.js');
 
-{{#jscMeta}}
-function MetaInfo() {
-  this.getLengthWidth = function() {
-    return {{jsmLengthWidth}};
-  };
-
-  this.getTypeWidth = function () {
-    return {{jsmTypeWidth}};
-  };
-
-  this.getPayloadOffset = function () {
-    return {{jsmLengthWidth}} + {{jsmTypeWidth}};
-  };
-}
-{{/jscMeta}}
-
 /* Define all type information. */
 {{#jscTypes}}
 /* {{jstDetail.jstName}} */
@@ -33,40 +17,25 @@ exports.{{jstDetail.jstConstructor}} = {{jstDetail.jstConstructor}};
 
 {{/jscTypes}}
 
-function TypeInfo() {
-  this.types = {
+var libTypes = {
 {{#jscTypes}}
-    '{{jstDetail.jstName}}': {{jstDetail.jstConstructor}},
+  '{{jstDetail.jstName}}': {{jstDetail.jstConstructor}},
 {{/jscTypes}}
-  };
-
-  this.withTag = function(prefix) {
-    function prefixMatches(tag) {
-      var i;
-
-      for (i = 0; i < prefix.length; i++) {
-        if (prefix[i] !== tag[i]) {
-          return false;
-        }
-      }
-
-      return true;
-    }
-
-    var tyName;
-    for (tyName in this.types) {
-      if (this.types.hasOwnProperty(tyName)) {
-        if (prefixMatches(this.types[tyName].hash)) {
-          return this.types[tyName];
-        }
-      }
-    }
-
-    return undefined;
-  };
-}
-
-exports.CautInfo = function () {
-  this.meta = new MetaInfo();
-  this.types = new TypeInfo();
 };
+Object.freeze(libTypes);
+
+var metaInfo = {
+{{#jscMeta}}
+  lengthWidth: {{jsmLengthWidth}},
+  typeWidth: {{jsmTypeWidth}},
+{{/jscMeta}}
+};
+Object.freeze(metaInfo);
+
+var specInfo = {
+  types: libTypes,
+  metaInfo: metaInfo,
+};
+Object.freeze(specInfo);
+
+exports.SpecificationInfo = specInfo;

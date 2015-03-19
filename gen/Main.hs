@@ -3,6 +3,7 @@ module Main
   ( main
   ) where
 
+import Control.Monad
 import Data.Data
 import Data.Word
 import Options.Applicative
@@ -70,6 +71,9 @@ caut2js (CautJSOpts { specFile = specPath, metaFile = metaPath, outputDirectory 
 
 generateOutput :: Spec.Spec -> Meta.Meta -> FilePath -> IO ()
 generateOutput spec meta out = do
+  createDirIfNotExist $ out `combine` "libcaut"
+  createDirIfNotExist $ out `combine` "libcaut" `combine` "prototypes"
+
   copyFiles
   renderFiles
   where
@@ -84,24 +88,54 @@ generateOutput spec meta out = do
       renderTo spec meta tc_tmpl (out `combine` "test_client.js")
       renderTo spec meta lib_tmpl (out `combine` libFileName)
 
+    libfiles :: [String]
+    libfiles = [ "buffer.js"
+               , "cast.js"
+               , "cauterize.js"
+               , "prototypes.js"
+               , "typedict.js"
+               ]
+
+    libprotfiles :: [String]
+    libprotfiles = [ "carray.js"
+                   , "cbuiltin.js"
+                   , "ccombination.js"
+                   , "crecord.js"
+                   , "csynonym.js"
+                   , "ctype.js"
+                   , "cunion.js"
+                   , "cvector.js"
+                   ]
+
     copyFiles = do
-      ca <- getDataFileName "support/cauterize.js"
-      bi <- getDataFileName "support/builtin_lib.js"
-      cb <- getDataFileName "support/caut_buffer.js"
-      copyFile ca (out `combine` "cauterize.js")
-      copyFile bi (out `combine` "builtin_lib.js")
-      copyFile cb (out `combine` "caut_buffer.js")
+
+      forM_ libfiles $ \f ->
+        do n <- getDataFileName ("support/libcaut/" ++ f)
+           copyFile n (out `combine` "libcaut" `combine` f)
+      forM_ libprotfiles $ \f ->
+        do n <- getDataFileName ("support/libcaut/prototypes/" ++ f)
+           copyFile n (out `combine` "libcaut" `combine` "prototypes" `combine` f)
+
+
+    -- copyFiles = do
+    --   ca <- getDataFileName "support/cauterize.js"
+    --   bi <- getDataFileName "support/builtin_lib.js"
+    --   cb <- getDataFileName "support/caut_buffer.js"
+    --   copyFile ca (out `combine` "cauterize.js")
+    --   copyFile bi (out `combine` "builtin_lib.js")
+    --   copyFile cb (out `combine` "caut_buffer.js")
 
 createGuard :: FilePath -> IO () -> IO ()
-createGuard out go = do
+createGuard out go = createDirIfNotExist out >> go
+
+createDirIfNotExist :: FilePath -> IO ()
+createDirIfNotExist out = do
   fe <- doesFileExist out
   de <- doesDirectoryExist out
 
   if fe
     then error $ "Error: " ++ out ++ " is a file."
-    else if de
-          then go
-          else createDirectory out >> go
+    else unless de $ createDirectory out
 
 data JSCtx = JSCtx
   { jscLibName :: T.Text

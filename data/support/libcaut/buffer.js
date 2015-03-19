@@ -12,7 +12,7 @@
  *    - CautBuffer
  */
 function CautBuffer() {
-  this.buffers = [];
+  this.buffers = [new Uint8Array([])];
   this.reset();
 }
 
@@ -27,7 +27,7 @@ CautBuffer.prototype.addU8Array = function (buffer) {
   if (buffer instanceof Uint8Array) {
     this.buffers.push(buffer);
   } else {
-    throw new Error("Expected Uint8Array.");
+    throw new Error("Expected Uint8Array. Got: " + buffer);
   }
 };
 
@@ -41,7 +41,11 @@ CautBuffer.prototype.addU8 = function(u8) {
 
 /* Append another CautBuf to this one.  */
 CautBuffer.prototype.append = function(cb) {
-  this.addU8Array(cb.allData());
+  if (cb instanceof CautBuffer) {
+    this.addU8Array(cb.allData());
+  } else {
+    throw new Error("Can only append CautBuffers. Not " + cb);
+  }
 };
 
 /* Concatenate all internal buffers into 1. */

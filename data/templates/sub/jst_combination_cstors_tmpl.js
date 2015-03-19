@@ -4,15 +4,15 @@ function {{jstDetail.jstConstructor}}(elems) { prot.CCombination.call(this, elem
   var typeHash = [{{#jstDetail.jstHash}}{{.}},{{/jstDetail.jstHash}}];
   var typeSize = { min: {{jstDetail.jstSize.jstMinSize}}, max: {{jstDetail.jstSize.jstMaxSize}} };
   var fields = [
-  {{#jstCombinationFields}}
-  {{#JSTDataField}}
+{{#jstCombinationFields}}
+{{#JSTDataField}}
       { name: "{{jstdfName}}", index: {{jstdfIndex}}, ref: {{jstdfRefCtor}} },
-  {{/JSTDataField}}
-  {{#JSTEmptyField}}
+{{/JSTDataField}}
+{{#JSTEmptyField}}
       { name: "{{jstefName}}", index: {{jstefIndex}} },
-  {{/JSTEmptyField}}
-  {{/jstCombinationFields}}
+{{/JSTEmptyField}}
+{{/jstCombinationFields}}
     ];
-  prot.mkCombination({{jstDetail.jstConstructor}}, '{{jstName}}', fields, typeHash, typeSize);
+  prot.mkCombination({{jstDetail.jstConstructor}}, '{{jstName}}', fields, {{jstCombinationFlagsWidth}}, typeHash, typeSize);
 }());
 {{/JSTCombination}}

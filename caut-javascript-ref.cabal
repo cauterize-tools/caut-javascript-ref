@@ -18,7 +18,8 @@ cabal-version:       >=1.10
 data-dir:   data
 data-files: templates/*.js,
             templates/sub/*.js,
-            support/*.js
+            support/libcaut/*.js
+            support/libcaut/prototypes/*.js
 
 library
   hs-source-dirs:      src/

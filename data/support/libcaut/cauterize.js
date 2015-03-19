@@ -19,31 +19,33 @@ function Cauterize(specDesc) {
 }
 
 Cauterize.prototype.decode = function (cautBuffer) {
-  var payloadLength = cast.bytesToInt(cautBuffer, this.metaInfo.getLengthWidth());
+  var payloadLength = cast.bytesToInt(cautBuffer, this.metaInfo.lengthWidth);
 
   if (cautBuffer.remaining() < payloadLength) {
     throw new Error("Not enough bytes in buffer: " + payloadLength);
   }
 
-  var payloadTag = cast.bytesToInt(cautBuffer, this.metaInfo.getTypeWidth());
+  var payloadTag = cast.someBytes(cautBuffer, this.metaInfo.typeWidth);
   var typeCtor = this.typeDict.typeWithHashPrefixE(payloadTag).ctor;
 
-  return typeCtor.decode(cautBuffer);
+  return typeCtor.unpack(cautBuffer);
 };
 
 Cauterize.prototype.encode = function (typeInstance) {
   var headerBuffer = new buffer.CautBuffer();
   var payloadBuffer = new buffer.CautBuffer();
 
-  typeInstance.encode(payloadBuffer);
+  typeInstance.pack(payloadBuffer);
 
-  cast.intToBytes(headerBuffer, payloadBuffer.length(), this.metaInfo.getLengthWidth());
-  var tw = this.metaInfo.getTypeWidth();
+  cast.intToBytes(headerBuffer, payloadBuffer.length(), this.metaInfo.lengthWidth);
+  var tw = this.metaInfo.typeWidth;
   var i; for (i = 0; i < tw; i++) {
-    headerBuffer.addU8(typeInstance.hash[i]);
+    headerBuffer.addU8(typeInstance.constructor.hash[i]);
   }
 
   headerBuffer.append(payloadBuffer);
 
   return headerBuffer;
 };
+
+exports.Cauterize = Cauterize;

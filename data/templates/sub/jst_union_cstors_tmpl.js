@@ -4,14 +4,14 @@ function {{jstDetail.jstConstructor}}(elems) { prot.CUnion.call(this, elems); }
   var typeHash = [{{#jstDetail.jstHash}}{{.}},{{/jstDetail.jstHash}}];
   var typeSize = { min: {{jstDetail.jstSize.jstMinSize}}, max: {{jstDetail.jstSize.jstMaxSize}} };
   var fields = [
-  {{#jstUnionFields}}
-  {{#JSTDataField}}
+{{#jstUnionFields}}
+{{#JSTDataField}}
       { name: "{{jstdfName}}", index: {{jstdfIndex}}, ref: {{jstdfRefCtor}} },
-  {{/JSTDataField}}
-  {{#JSTEmptyField}}
+{{/JSTDataField}}
+{{#JSTEmptyField}}
       { name: "{{jstefName}}", index: {{jstefIndex}} },
-  {{/JSTEmptyField}}
-  {{/jstUnionFields}}
+{{/JSTEmptyField}}
+{{/jstUnionFields}}
     ];
   prot.mkUnion({{jstDetail.jstConstructor}}, '{{jstName}}', fields, {{jstUnionTagWidth}}, typeHash, typeSize);
 }());

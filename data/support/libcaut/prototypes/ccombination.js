@@ -32,7 +32,7 @@ CCombination.prototype.pack = function (cautBuffer) {
     cfield = this.constructor.fields[fieldIx];
     tfield = this.fields[cfield.name];
 
-    if (undefined !== tfield && undefined !== cfield.ctor) {
+    if (undefined !== tfield && undefined !== cfield.ref) {
       sum += tfield.pack(cautBuffer);
     }
   }
@@ -72,8 +72,8 @@ function unpack(combinationCtor, cautBuffer) {
   for (fieldIx = 0; fieldIx < combinationCtor.fields.length; fieldIx++) {
     cfield = combinationCtor.fields[fieldIx];
     if (flagsIncludeIndex(flags, cfield.index)) {
-      if (undefined !== cfield.ctor) {
-        fields[cfield.name] = cfield.ctor.unpack(cautBuffer);
+      if (undefined !== cfield.ref) {
+        fields[cfield.name] = cfield.ref.unpack(cautBuffer);
       } else {
         fields[cfield.name] = null;
       }
