@@ -69,27 +69,21 @@ CautBuffer.prototype.compact = function () {
 /* Return the next byte in the iterator. Throws an exception when the
  * iterator has exhausted the buffer. */
 CautBuffer.prototype.nextE = function () {
-  if (this.bufferIx >= this.buffers.length) {
-    // Out of buffers. This means we're out of data.
-    return undefined;
-  }
+  if (this.bufferIx < this.buffers.length) {
+    if (this.bufferPos < this.buffers[this.bufferIx].length) {
+      var n = this.buffers[this.bufferIx][this.bufferPos];
+      this.bufferPos += 1;
+      return n;
+    }
 
-  if (this.bufferPos >= this.buffers[this.bufferIx].length) {
     // Current buffer is out of data. Move to the next index and try again.
     this.bufferIx += 1;
     this.bufferPos = 0;
 
-    return this.next();
+    return this.nextE();
   }
 
-  var n = this.buffers[this.bufferIx][this.bufferPos];
-  this.bufferPos += 1;
-
-  if (undefined === n) {
-    throw new Error("Out of bytes!");
-  }
-
-  return n;
+  throw new Error("Out of bytes!");
 };
 
 /* Return the overall position in the buffer. */
