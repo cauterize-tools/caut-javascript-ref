@@ -5,6 +5,7 @@ var bi = require('./libcaut/prototypes/cbuiltin.js');
 var syn = require('./libcaut/prototypes/csynonym.js');
 var arr = require('./libcaut/prototypes/carray.js');
 var vec = require('./libcaut/prototypes/cvector.js');
+var rec = require('./libcaut/prototypes/crecord.js');
 var cb = require('./libcaut/buffer.js');
 
 var data = new ArrayBuffer(8);
@@ -135,4 +136,30 @@ vec.mkVector(VecU8, 'vec_u8', U8, 5, 1, [1,2,3], {min: 1, max: 6});
   assert.equal(0, ad[1]);
   assert.equal(1, ad[2]);
   assert.equal(2, ad[3]);
+}());
+
+function Rec(fields) { rec.CRecord.call(this, fields); }
+var recfields = [ { name: "a", index: 0, ctor: U8 },
+                  { name: "b", index: 1, ctor: U8 },
+                  { name: "c", index: 2, ctor: U8 } ];
+rec.mkRecord(Rec, "rec", recfields, [1,2,3], {min:3, max:3});
+
+(function () {
+  var recdata = new Uint8Array([10, 100, 200]);
+  var buffer = new cb.CautBuffer();
+  buffer.addU8Array(recdata);
+
+  var rec = Rec.unpack(buffer);
+  var js = rec.toJS();
+
+  assert.equal(10, js.a);
+  assert.equal(100, js.b);
+  assert.equal(200, js.c);
+
+  var pb = new cb.CautBuffer();
+  rec.pack(pb);
+  var ad = pb.allData();
+  assert.equal(10,  ad[0]);
+  assert.equal(100, ad[1]);
+  assert.equal(200, ad[2]);
 }());
