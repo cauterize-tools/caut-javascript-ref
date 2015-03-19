@@ -7,6 +7,7 @@ var arr = require('./libcaut/prototypes/carray.js');
 var vec = require('./libcaut/prototypes/cvector.js');
 var rec = require('./libcaut/prototypes/crecord.js');
 var comb = require('./libcaut/prototypes/ccombination.js');
+var uni = require('./libcaut/prototypes/cunion.js');
 var cb = require('./libcaut/buffer.js');
 
 var data = new ArrayBuffer(8);
@@ -190,4 +191,30 @@ comb.mkCombination(Comb, "comb", combfields, 1, [1,2,3], {min:1, max:4});
   var ad = pb.allData();
   assert.equal(4,  ad[0]);
   assert.equal(200, ad[1]);
+}());
+
+function Uni(field) { uni.CUnion.call(this,field); }
+var unifields = [ { name: "a", index: 0, ctor: U8 },
+                  { name: "b", index: 1, ctor: U32 } ];
+uni.mkUnion(Uni, "uni", unifields, 1, [1,2,3], {min:2, max:5});
+
+(function () {
+  var unidata = new Uint8Array([1,30,0,0,0]);
+  var buffer = new cb.CautBuffer();
+  buffer.addU8Array(unidata);
+
+  var u = Uni.unpack(buffer);
+  var js = u.toJS();
+
+  assert.equal(undefined, js.a);
+  assert.equal(30, js.b);
+
+  var pb = new cb.CautBuffer();
+  u.pack(pb);
+  var ad = pb.allData();
+  assert.equal(1,  ad[0]);
+  assert.equal(30, ad[1]);
+  assert.equal(0, ad[2]);
+  assert.equal(0, ad[3]);
+  assert.equal(0, ad[4]);
 }());
