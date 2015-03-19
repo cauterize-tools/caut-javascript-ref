@@ -1,13 +1,8 @@
 {{#JSTSynonym}}
-function {{jstDetail.jstConstructor}} (v) {
-  this.value = v;
-  this.pack = function (u8buf) {
-    return this.value.pack(u8buf);
-  };
-}
-{{jstDetail.jstConstructor}}.unpack = function (u8buf) {
-  var biVal = this.refTypeCtor.unpack(u8buf);
-  return new {{jstDetail.jstConstructor}}(biVal);
-};
-{{jstDetail.jstConstructor}}.refTypeCtor = {{jstSynnedCtor}};
+function {{jstDetail.jstConstructor}}(elems) { prot.CSynonym.call(this, elems); }
+(function () {
+  var typeHash = [{{#jstDetail.jstHash}}{{.}},{{/jstDetail.jstHash}}];
+  var typeSize = { min: {{jstDetail.jstSize.jstMinSize}}, max: {{jstDetail.jstSize.jstMaxSize}} };
+  prot.mkCombination({{jstDetail.jstConstructor}}, '{{jstName}}', {{jstSynnedCtor}}, typeHash, typeSize);
+}());
 {{/JSTSynonym}}

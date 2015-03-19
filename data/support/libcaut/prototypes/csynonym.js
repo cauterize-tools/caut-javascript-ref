@@ -25,7 +25,7 @@ function unpack(synCtor, cautBuffer) {
   return new synCtor(value);
 }
 
-function mkSyn(f, typename, synType, hash, size) {
+function mkSynonym(f, typename, synType, hash, size) {
   ctype.mkCType(f, typename, 'synonym', hash, size);
 
   f.prototype = Object.create(CSynonym.prototype);
@@ -39,4 +39,4 @@ function mkSyn(f, typename, synType, hash, size) {
 
   return f;
 }
-exports.mkSyn = mkSyn;
+exports.mkSynonym = mkSynonym;

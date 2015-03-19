@@ -1,13 +1,8 @@
-var assert = require('assert');
-
 /*globals ArrayBuffer, Uint8Array */
-var bi = require('./libcaut/prototypes/cbuiltin.js');
-var syn = require('./libcaut/prototypes/csynonym.js');
-var arr = require('./libcaut/prototypes/carray.js');
-var vec = require('./libcaut/prototypes/cvector.js');
-var rec = require('./libcaut/prototypes/crecord.js');
-var comb = require('./libcaut/prototypes/ccombination.js');
-var uni = require('./libcaut/prototypes/cunion.js');
+'use strict';
+
+var assert = require('assert');
+var prot = require('./libcaut/prototypes.js');
 var cb = require('./libcaut/buffer.js');
 
 var data = new ArrayBuffer(8);
@@ -19,8 +14,8 @@ var i; for (i = 0; i < data.byteLength; i++) {
 /**
  * Can we define a U8?
  */
-function U8(buffer) { bi.CBuiltIn.call(this, buffer); }
-bi.mkU8(U8, [1,2,3], {min: 1, max: 1});
+function U8(buffer) { prot.CBuiltIn.call(this, buffer); }
+prot.mkU8(U8, [1,2,3], {min: 1, max: 1});
 
 (function () {
   /* Test we can define a U8. */
@@ -38,8 +33,8 @@ bi.mkU8(U8, [1,2,3], {min: 1, max: 1});
 /**
  * Can we define a U32?
  */
-function U32(buffer) { bi.CBuiltIn.call(this, buffer); }
-bi.mkU32(U32, [1,2,3], {min: 4, max: 4});
+function U32(buffer) { prot.CBuiltIn.call(this, buffer); }
+prot.mkU32(U32, [1,2,3], {min: 4, max: 4});
 
 (function () {
   /* Test we can define a U32. */
@@ -61,8 +56,8 @@ bi.mkU32(U32, [1,2,3], {min: 4, max: 4});
 /**
  * Can we define a synonym?
  */
-function AnU32(value) { syn.CSynonym.call(this, value); }
-syn.mkSyn(AnU32, 'an_u8', U32, [1,2,3], {min:4, max:4});
+function AnU32(value) { prot.CSynonym.call(this, value); }
+prot.mkSynonym(AnU32, 'an_u8', U32, [1,2,3], {min:4, max:4});
 
 (function () {
   /* Test we can define a Synonym */
@@ -84,8 +79,8 @@ syn.mkSyn(AnU32, 'an_u8', U32, [1,2,3], {min:4, max:4});
 /**
  * Can we define an array?
  */
-function ArrU8(elems) { arr.CArray.call(this, elems); }
-arr.mkArray(ArrU8, 'arr_u8', U8, 5, [1,2,3], {min: 5, max: 5});
+function ArrU8(elems) { prot.CArray.call(this, elems); }
+prot.mkArray(ArrU8, 'arr_u8', U8, 5, [1,2,3], {min: 5, max: 5});
 
 (function () {
   var buffer = new cb.CautBuffer();
@@ -114,8 +109,8 @@ arr.mkArray(ArrU8, 'arr_u8', U8, 5, [1,2,3], {min: 5, max: 5});
 /**
  * Can we define a vector?
  */
-function VecU8(elems) { vec.CVector.call(this, elems); }
-vec.mkVector(VecU8, 'vec_u8', U8, 5, 1, [1,2,3], {min: 1, max: 6});
+function VecU8(elems) { prot.CVector.call(this, elems); }
+prot.mkVector(VecU8, 'vec_u8', U8, 5, 1, [1,2,3], {min: 1, max: 6});
 
 (function () {
   var vecdata = new Uint8Array([3, 0, 1, 2]);
@@ -140,11 +135,11 @@ vec.mkVector(VecU8, 'vec_u8', U8, 5, 1, [1,2,3], {min: 1, max: 6});
   assert.equal(2, ad[3]);
 }());
 
-function Rec(fields) { rec.CRecord.call(this, fields); }
+function Rec(fields) { prot.CRecord.call(this, fields); }
 var recfields = [ { name: "a", index: 0, ctor: U8 },
                   { name: "b", index: 1, ctor: U8 },
                   { name: "c", index: 2, ctor: U8 } ];
-rec.mkRecord(Rec, "rec", recfields, [1,2,3], {min:3, max:3});
+prot.mkRecord(Rec, "rec", recfields, [1,2,3], {min:3, max:3});
 
 (function () {
   var recdata = new Uint8Array([10, 100, 200]);
@@ -166,11 +161,11 @@ rec.mkRecord(Rec, "rec", recfields, [1,2,3], {min:3, max:3});
   assert.equal(200, ad[2]);
 }());
 
-function Comb(fields) { rec.CRecord.call(this, fields); }
+function Comb(fields) { prot.CCombination.call(this, fields); }
 var combfields = [ { name: "a", index: 0, ctor: U8 },
                    { name: "b", index: 1, ctor: U8 },
                    { name: "c", index: 2, ctor: U8 } ];
-comb.mkCombination(Comb, "comb", combfields, 1, [1,2,3], {min:1, max:4});
+prot.mkCombination(Comb, "comb", combfields, 1, [1,2,3], {min:1, max:4});
 
 (function () {
   var combdata = new Uint8Array([5, 10, 200]);
@@ -193,10 +188,10 @@ comb.mkCombination(Comb, "comb", combfields, 1, [1,2,3], {min:1, max:4});
   assert.equal(200, ad[1]);
 }());
 
-function Uni(field) { uni.CUnion.call(this,field); }
+function Uni(field) { prot.CUnion.call(this,field); }
 var unifields = [ { name: "a", index: 0, ctor: U8 },
                   { name: "b", index: 1, ctor: U32 } ];
-uni.mkUnion(Uni, "uni", unifields, 1, [1,2,3], {min:2, max:5});
+prot.mkUnion(Uni, "uni", unifields, 1, [1,2,3], {min:2, max:5});
 
 (function () {
   var unidata = new Uint8Array([1,30,0,0,0]);

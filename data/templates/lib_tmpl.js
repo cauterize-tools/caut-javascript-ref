@@ -1,6 +1,6 @@
-// lib{{jscLibName}}.js
-var C = require('./cauterize.js');
-var BIS = require('./builtin_lib.js');
+'use strict';
+
+var prot = require('./libcaut/prototypes.js');
 
 {{#jscMeta}}
 function MetaInfo() {
@@ -28,10 +28,6 @@ function MetaInfo() {
 {{> jst_synonym_cstors_tmpl.js}}
 {{> jst_union_cstors_tmpl.js}}
 {{> jst_vector_cstors_tmpl.js}}
-{{jstDetail.jstConstructor}}.name = "{{jstDetail.jstName}}";
-{{jstDetail.jstConstructor}}.proto = '{{jstDetail.jstPrototype}}';
-{{jstDetail.jstConstructor}}.hash = [{{#jstDetail.jstHash}}{{.}},{{/jstDetail.jstHash}}];
-{{jstDetail.jstConstructor}}.size = { min: {{jstDetail.jstSize.jstMinSize}}, max: {{jstDetail.jstSize.jstMaxSize}} };
 Object.freeze({{jstDetail.jstConstructor}});
 exports.{{jstDetail.jstConstructor}} = {{jstDetail.jstConstructor}};
 
@@ -55,12 +51,14 @@ function TypeInfo() {
       }
 
       return true;
-    };
+    }
 
-    var i;
-    for (var tyName in this.types) {
-      if (prefixMatches(this.types[tyName].hash)) {
-        return this.types[tyName];
+    var tyName;
+    for (tyName in this.types) {
+      if (this.types.hasOwnProperty(tyName)) {
+        if (prefixMatches(this.types[tyName].hash)) {
+          return this.types[tyName];
+        }
       }
     }
 
