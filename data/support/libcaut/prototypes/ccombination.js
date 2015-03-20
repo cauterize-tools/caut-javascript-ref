@@ -1,7 +1,12 @@
+/*global Uint8Array */
 'use strict';
 
 var ctype = require('./ctype.js');
 var cast = require('../cast.js');
+
+function calcIxs(ix) {
+  return { byteIx: Math.floor(ix / 8), bitIx: ix % 8 };
+}
 
 function CCombination(fields) {
   this.fields = fields;
@@ -9,15 +14,16 @@ function CCombination(fields) {
 CCombination.prototype = Object.create(ctype.CType.prototype);
 CCombination.prototype.cautproto = 'combination';
 CCombination.prototype.pack = function (cautBuffer) {
-  function fieldsToFlags(cfields, tfields) {
-    var ix, cfield;
-    var flags = 0;
+  function fieldsToFlags(cfields, tfields, width) {
+    var ix, ixs, cfield;
+    var flags = new Uint8Array(width);
 
     for (ix = 0; ix < cfields.length; ix++) {
       cfield = cfields[ix];
 
       if (undefined !== tfields[cfield.name]) {
-        flags |= (1 << cfield.index);
+        ixs = calcIxs(cfield.index);
+        flags[ixs.byteIx] |= (1 << ixs.bitIx);
       }
     }
 
@@ -25,8 +31,10 @@ CCombination.prototype.pack = function (cautBuffer) {
   }
 
   var fieldIx, tfield, cfield;
-  var flags = fieldsToFlags(this.constructor.fields, this.fields);
-  var sum = cast.intToBytes(cautBuffer, flags, this.constructor.flagsWidth);
+  var flags = fieldsToFlags(this.constructor.fields, this.fields, this.constructor.flagsWidth);
+  var sum = this.constructor.flagsWidth;
+
+  cautBuffer.addU8Array(flags);
 
   for (fieldIx = 0; fieldIx < this.constructor.fields.length; fieldIx++) {
     cfield = this.constructor.fields[fieldIx];
@@ -62,10 +70,11 @@ exports.CCombination = CCombination;
 
 function unpack(combinationCtor, cautBuffer) {
   function flagsIncludeIndex(flags, index) {
-    return (flags & (1 << index));
+    var ixs = calcIxs(index);
+    return (flags[ixs.byteIx] & (1 << ixs.bitIx));
   }
 
-  var flags = cast.bytesToInt(cautBuffer, combinationCtor.flagsWidth);
+  var flags = cast.someBytes(cautBuffer, combinationCtor.flagsWidth);
   var fieldIx, cfield;
   var fields = {};
 

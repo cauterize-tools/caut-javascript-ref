@@ -22,7 +22,5 @@ process.stdin.on('end', function () {
   var e = clib.encode(t);
   var ad = e.allData();
 
-  console.error("ALL DATA", ad);
-
   process.stdout.write(new Buffer(ad));
 });
