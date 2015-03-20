@@ -24,12 +24,15 @@ data-files: templates/*.js,
 library
   hs-source-dirs:      src/
   ghc-options:         -Wall -O2
-  exposed-modules:     Cauterize.JavaScript
-  -- other-modules:       
-  -- other-extensions:    
+  exposed-modules:     Cauterize.JavaScript,
+                       Cauterize.JavaScript.Options,
+                       Paths_caut_javascript_ref
   build-depends:       base >=4.7 && <4.8,
                        cauterize >= 0.1.0.0,
-                       hastache == 0.6.0
+                       directory,
+                       filepath,
+                       hastache == 0.6.0,
+                       text
   default-language:    Haskell2010
 
 executable caut-javascript-ref-gen
@@ -38,10 +41,5 @@ executable caut-javascript-ref-gen
   ghc-options:         -Wall -O2
   default-language:    Haskell2010
   build-depends:       base >=4.7 && <4.8,
-                       cauterize >= 0.1.0.0,
-                       caut-javascript-ref,
-                       directory,
-                       filepath,
-                       hastache == 0.6.0,
                        optparse-applicative,
-                       text
+                       caut-javascript-ref
