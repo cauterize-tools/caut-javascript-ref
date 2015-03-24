@@ -57,9 +57,6 @@ function s32ToJs(ab) { return new Int32Array(ab)[0]; }
 function s64ToJs(ab) { var u32 = new Uint32Array(ab); return [u32[0], u32[1]]; }
 function f32ToJs(ab) { return new Float32Array(ab)[0]; }
 function f64ToJs(ab) { return new Float64Array(ab)[0]; }
-function cu8ToJs(ab)  { return new Uint8Array(ab)[0]; }
-function cu16ToJs(ab) { return new Uint16Array(ab)[0]; }
-function cu32ToJs(ab) { return new Uint32Array(ab)[0]; }
 function boolToJs(ab) {
   var u8 = new Uint8Array(ab)[0];
   if (u8 === 0) { return false; }
@@ -121,21 +118,6 @@ function mkS64(f, hash, size) {
   return ebi(ctype.mkCType(f, 's64', 'builtin', hash, size), 8, s64ToJs);
 }
 exports.mkS64 = mkS64;
-
-function mkCu8(f, hash, size) {
-  return ebi(ctype.mkCType(f, 'cu8', 'builtin', hash, size), 1, cu8ToJs);
-}
-exports.mkCu8 = mkCu8;
-
-function mkCu16(f, hash, size) {
-  return ebi(ctype.mkCType(f, 'cu16', 'builtin', hash, size), 2, cu16ToJs);
-}
-exports.mkCu16 = mkCu16;
-
-function mkCu32(f, hash, size) {
-  return ebi(ctype.mkCType(f, 'u32', 'builtin', hash, size), 4, cu32ToJs);
-}
-exports.mkCu32 = mkCu32;
 
 function mkF32(f, hash, size) {
   return ebi(ctype.mkCType(f, 'f32', 'builtin', hash, size), 4, f32ToJs);
