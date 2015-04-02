@@ -16,26 +16,21 @@ import Text.Hastache.Context
 import qualified Cauterize.Common.Types as C
 import qualified Cauterize.FormHash as H
 import qualified Cauterize.Specification as Spec
-import qualified Cauterize.Meta as Meta
 import qualified Data.Text.Lazy as T
 import qualified Data.Text.Lazy.IO as T
 
 import Paths_caut_javascript_ref
 
 caut2js :: CautJSOpts -> IO ()
-caut2js (CautJSOpts { specFile = specPath, metaFile = metaPath, outputDirectory = outPath }) = createGuard outPath $ do
+caut2js (CautJSOpts { specFile = specPath, outputDirectory = outPath }) = createGuard outPath $ do
   spec <- Spec.parseFile specPath
-  meta <- Meta.parseFile metaPath
 
   case spec of
     Left es -> error $ show es
-    Right s' ->
-      case meta of
-        Left em -> error $ show em
-        Right m' -> generateOutput s' m' outPath
+    Right s' -> generateOutput s' outPath
 
-generateOutput :: Spec.Spec -> Meta.Meta -> FilePath -> IO ()
-generateOutput spec meta out = do
+generateOutput :: Spec.Spec -> FilePath -> IO ()
+generateOutput spec out = do
   createDirIfNotExist $ out `combine` "libcaut"
   createDirIfNotExist $ out `combine` "libcaut" `combine` "prototypes"
 
@@ -50,8 +45,8 @@ generateOutput spec meta out = do
       tc_tmpl <- getDataFileName "templates/test_client_tmpl.js"
       lib_tmpl <- getDataFileName "templates/lib_tmpl.js"
 
-      renderTo spec meta tc_tmpl (out `combine` "test_client.js")
-      renderTo spec meta lib_tmpl (out `combine` libFileName)
+      renderTo spec tc_tmpl (out `combine` "test_client.js")
+      renderTo spec lib_tmpl (out `combine` libFileName)
 
     libfiles :: [String]
     libfiles = [ "buffer.js"
@@ -151,13 +146,13 @@ data JSTypeCtx
 data JSTSizeCtx = JSTSizeCtx { jstMinSize :: Integer, jstMaxSize :: Integer }
   deriving (Show, Eq, Data, Typeable)
 
-mkJsCtx :: Spec.Spec -> Meta.Meta -> JSCtx
-mkJsCtx spec meta = JSCtx
+mkJsCtx :: Spec.Spec -> JSCtx
+mkJsCtx spec = JSCtx
   { jscLibName = Spec.specName spec
   , jscMeta =
       JSMetaCtx
-        { jsmLengthWidth = Meta.metaDataLength meta
-        , jsmTypeWidth = Meta.metaTypeLength meta
+        { jsmLengthWidth = Spec.unLengthTagWidth . Spec.specLengthTagWidth $ spec
+        , jsmTypeWidth = Spec.unTypeTagWidth . Spec.specTypeTagWidth $ spec
         }
   , jscTypes = map mkJsType (Spec.specTypes spec)
   }
@@ -227,12 +222,12 @@ nameToConstructor n =
       caped = map T.toTitle parts
   in T.concat caped
 
-renderTo :: Spec.Spec -> Meta.Meta -> FilePath -> FilePath -> IO ()
-renderTo spec meta templatePath destPath = do
+renderTo :: Spec.Spec -> FilePath -> FilePath -> IO ()
+renderTo spec templatePath destPath = do
   template <- T.readFile templatePath
   cfg <- mkCfg
   rendered <- hastacheStr cfg (encodeStr $ T.unpack template)
-                              (mkGenericContext $ mkJsCtx spec meta)
+                              (mkGenericContext $ mkJsCtx spec)
   T.writeFile destPath rendered
   where
     mkCfg = do

@@ -4,6 +4,5 @@ module Cauterize.JavaScript.Options
 
 data CautJSOpts = CautJSOpts
   { specFile :: FilePath
-  , metaFile :: FilePath
   , outputDirectory :: FilePath
   } deriving (Show)
