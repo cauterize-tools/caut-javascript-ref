@@ -28,9 +28,7 @@ prot.mkU8(U8, [1,2,3], {min: 1, max: 1});
   assert.equal(10, buffer.allData()[0]);
 
   assert.equal(10, U8.unpack(buffer).toJS());
-
-  var x = U8.fromJS(198);
-  assert.equal(198, x.toJS());
+  assert.equal(198, U8.fromJS(198).toJS());
 }());
 
 /**
@@ -55,8 +53,7 @@ prot.mkU32(U32, [1,2,3], {min: 4, max: 4});
 
   assert.equal(218893066, U32.unpack(buffer).toJS());
 
-  var x = U32.fromJS(5000);
-  assert.equal(5000, x.toJS());
+  assert.equal(5019, U32.fromJS(5019).toJS());
 }());
 
 /**
