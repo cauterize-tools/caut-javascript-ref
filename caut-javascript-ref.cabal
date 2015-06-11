@@ -17,28 +17,29 @@ cabal-version:       >=1.10
 
 data-dir:   data
 data-files: templates/*.js,
-            templates/sub/*.js,
-            support/libcaut/*.js
-            support/libcaut/prototypes/*.js
+            templates/sub/*.js
 
 library
   hs-source-dirs:      src/
   ghc-options:         -Wall -O2
   exposed-modules:     Cauterize.JavaScript,
                        Cauterize.JavaScript.Options,
+                       Cauterize.JavaScript.Files,
                        Paths_caut_javascript_ref
   build-depends:       base >=4.7 && <4.8,
                        cauterize >= 0.1.0.0,
                        directory,
                        filepath,
                        hastache == 0.6.0,
-                       text
+                       text,
+                       file-embed,
+                       bytestring
   default-language:    Haskell2010
 
 executable caut-javascript-ref-gen
   hs-source-dirs:      gen
   main-is:             Main.hs
-  ghc-options:         -Wall -O2
+  ghc-options:         -Wall -O2 -static
   default-language:    Haskell2010
   build-depends:       base >=4.7 && <4.8,
                        optparse-applicative,

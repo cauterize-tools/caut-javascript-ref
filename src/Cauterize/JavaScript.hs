@@ -13,6 +13,8 @@ import System.FilePath.Posix
 import Text.Hastache
 import Text.Hastache.Context
 
+import Cauterize.JavaScript.Files
+import qualified Data.ByteString as B
 import qualified Cauterize.Common.Types as C
 import qualified Cauterize.FormHash as H
 import qualified Cauterize.Specification as Spec
@@ -48,42 +50,7 @@ generateOutput spec out = do
       renderTo spec tc_tmpl (out `combine` "test_client.js")
       renderTo spec lib_tmpl (out `combine` libFileName)
 
-    libfiles :: [String]
-    libfiles = [ "buffer.js"
-               , "cast.js"
-               , "cauterize.js"
-               , "prototypes.js"
-               , "typedict.js"
-               ]
-
-    libprotfiles :: [String]
-    libprotfiles = [ "carray.js"
-                   , "cbuiltin.js"
-                   , "ccombination.js"
-                   , "crecord.js"
-                   , "csynonym.js"
-                   , "ctype.js"
-                   , "cunion.js"
-                   , "cvector.js"
-                   ]
-
-    copyFiles = do
-
-      forM_ libfiles $ \f ->
-        do n <- getDataFileName ("support/libcaut/" ++ f)
-           copyFile n (out `combine` "libcaut" `combine` f)
-      forM_ libprotfiles $ \f ->
-        do n <- getDataFileName ("support/libcaut/prototypes/" ++ f)
-           copyFile n (out `combine` "libcaut" `combine` "prototypes" `combine` f)
-
-
-    -- copyFiles = do
-    --   ca <- getDataFileName "support/cauterize.js"
-    --   bi <- getDataFileName "support/builtin_lib.js"
-    --   cb <- getDataFileName "support/caut_buffer.js"
-    --   copyFile ca (out `combine` "cauterize.js")
-    --   copyFile bi (out `combine` "builtin_lib.js")
-    --   copyFile cb (out `combine` "caut_buffer.js")
+    copyFiles = forM_ allFiles $ \(path, bs) -> B.writeFile (out `combine` path) bs
 
 createGuard :: FilePath -> IO () -> IO ()
 createGuard out go = createDirIfNotExist out >> go
