@@ -15,6 +15,7 @@ import Text.Hastache.Context
 
 import Cauterize.JavaScript.Files
 import Cauterize.JavaScript.TestClientTemplate
+import Cauterize.JavaScript.LibTemplate
 import qualified Data.ByteString as B
 import qualified Cauterize.Common.Types as C
 import qualified Cauterize.FormHash as H
@@ -45,10 +46,11 @@ generateOutput spec out = do
     libFileName = libName ++ ".js"
 
     renderFiles = do
-      lib_tmpl <- getDataFileName "templates/lib_tmpl.js"
+      -- lib_tmpl <- getDataFileName "templates/lib_tmpl.js"
 
       writeFile (out `combine` "test_client.js") (testClientFromSpec spec)
-      renderTo spec lib_tmpl (out `combine` libFileName)
+      writeFile (out `combine` libFileName) (libFromSpec spec)
+      -- renderTo spec lib_tmpl (out `combine` libFileName)
 
     copyFiles = forM_ allFiles $ \(path, bs) -> B.writeFile (out `combine` path) bs
 

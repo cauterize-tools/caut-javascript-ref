@@ -26,6 +26,7 @@ library
                        Cauterize.JavaScript.Options,
                        Cauterize.JavaScript.Files,
                        Cauterize.JavaScript.TestClientTemplate,
+                       Cauterize.JavaScript.LibTemplate,
                        Paths_caut_javascript_ref
   build-depends:       base >=4.7 && <4.8,
                        cauterize >= 0.1.0.0,
@@ -35,7 +36,8 @@ library
                        text,
                        file-embed,
                        bytestring,
-                       interpolate
+                       interpolate,
+                       split
   default-language:    Haskell2010
 
 executable caut-javascript-ref-gen
