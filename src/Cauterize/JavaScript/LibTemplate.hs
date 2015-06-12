@@ -62,6 +62,7 @@ function #{ctor}(elems) { prot.#{jsProt t}.call(this, elems); }
 (function () {
   var typeHash = [#{h}];
   var typeSize = { min: #{S.minSize t}, max: #{S.maxSize t} };
+#{jsMkFields t}
   prot.#{jsMkType n ctor t}
 }());
 libTypes['#{n}'] = #{ctor};
@@ -76,20 +77,41 @@ jsProt S.Record {} = "CRecord"
 jsProt S.Union {} = "CUnion"
 jsProt S.Combination {} = "CCombination"
 
-jsMkType :: String -> String -> S.SpType -> String
-jsMkType _ ctor S.BuiltIn {} = [i|
-  mk#{ctor}(#{ctor}, typeHash, typeSize);
+jsMkFields :: S.SpType -> String
+jsMkFields f =
+  case f of
+    S.Record { S.unRecord = (S.TRecord { S.recordFields = S.Fields rfs }) }
+      -> go rfs
+    S.Combination { S.unCombination = (S.TCombination { S.combinationFields = S.Fields cfs }) }
+      -> go cfs
+    S.Union { S.unUnion = (S.TUnion { S.unionFields = S.Fields ufs }) }
+      -> go ufs
+    _ -> ""
+  where
+    fieldStr S.EmptyField { S.fName = n, S.fIndex = ix } =
+      [i|    { name: "#{n}", index: #{show ix} },|]
+    fieldStr S.Field { S.fName = n, S.fRef = r, S.fIndex = ix } =
+      [i|    { name: "#{n}", index: #{show ix}, ref: #{nameToConstructor (unpack r)} },|]
+    -- there's some weirdness in go to get the newlines in the right place
+    go fs = [i|
+  var fields = [
+#{unlines $ map fieldStr fs}  ];
 |]
+
+jsMkType :: String -> String -> S.SpType -> String
+jsMkType _ ctor S.BuiltIn {} =
+  [i|mk#{ctor}(#{ctor}, typeHash, typeSize);|]
 jsMkType n ctor S.Synonym { S.unSynonym = (S.TSynonym { S.synonymRepr = r } ) } =
   let refCtor = nameToConstructor (show r)
-  in [i|
-  mkSynonym(#{ctor}, '#{n}', #{refCtor}, typeHash, typeSize);
-|]
+  in [i|mkSynonym(#{ctor}, '#{n}', #{refCtor}, typeHash, typeSize);|]
 jsMkType n ctor S.Array { S.unArray = (S.TArray { S.arrayRef = ar, S.arrayLen = al }) } =
   let refCtor = nameToConstructor (unpack ar)
-  in [i|
-  mkArray(#{ctor}, '#{n}', #{refCtor}, #{show al}, typeHash, typeSize);
-|]
+  in [i|mkArray(#{ctor}, '#{n}', #{refCtor}, #{show al}, typeHash, typeSize);|]
+jsMkType n ctor S.Vector { S.unVector = (S.TVector { S.vectorRef = vr, S.vectorMaxLen = vml}), S.lenRepr = S.LengthRepr lr } =
+  let refCtor = nameToConstructor (unpack vr)
+  in [i|mkVector(#{ctor}, '#{n}', #{refCtor}, #{show vml}, #{show $ S.builtInSize lr}, typeHash, typeSize);|]
+jsMkType n ctor S.Record {} =
+  [i|mkRecord(#{ctor}, '#{n}', fields, typeHash, typeSize);|]
 
 nameToConstructor :: String -> String
 nameToConstructor n =
