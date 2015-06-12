@@ -32,7 +32,6 @@ library
                        cauterize >= 0.1.0.0,
                        directory,
                        filepath,
-                       hastache == 0.6.0,
                        text,
                        file-embed,
                        bytestring,
