@@ -1,7 +1,21 @@
+{-# LANGUAGE QuasiQuotes #-}
+module Cauterize.JavaScript.TestClientTemplate
+  ( testClientFromSpec
+  ) where
+
+import Data.String.Interpolate
+import Data.Text.Lazy (unpack)
+
+import qualified Cauterize.Specification as S
+
+testClientFromSpec :: S.Spec -> String
+testClientFromSpec spec =
+  let ln = unpack $ S.specName spec
+  in [i|
 /*global Uint8Array */
 'use strict';
 
-var lib = require('./lib{{jscLibName}}.js');
+var lib = require('./lib#{ln}.js');
 var c = require('./libcaut/cauterize.js');
 var cb = require('./libcaut/buffer.js');
 
@@ -24,3 +38,5 @@ process.stdin.on('end', function () {
 
   process.stdout.write(new Buffer(ad));
 });
+|]
+
