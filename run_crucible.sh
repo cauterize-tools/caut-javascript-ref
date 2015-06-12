@@ -6,5 +6,4 @@
            --schema-count=1 \
            --instance-count=100 \
            --type-count=100 \
-           --prototypes=synonym,array,vector,record \
            --enc-size=1024

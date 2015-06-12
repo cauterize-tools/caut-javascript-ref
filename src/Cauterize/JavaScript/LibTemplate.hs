@@ -112,6 +112,10 @@ jsMkType n ctor S.Vector { S.unVector = (S.TVector { S.vectorRef = vr, S.vectorM
   in [i|mkVector(#{ctor}, '#{n}', #{refCtor}, #{show vml}, #{show $ S.builtInSize lr}, typeHash, typeSize);|]
 jsMkType n ctor S.Record {} =
   [i|mkRecord(#{ctor}, '#{n}', fields, typeHash, typeSize);|]
+jsMkType n ctor S.Combination { S.flagsRepr = (S.FlagsRepr fr) } =
+  [i|mkCombination(#{ctor}, '#{n}', fields, #{show $ S.builtInSize fr}, typeHash, typeSize);|]
+jsMkType n ctor S.Union { S.tagRepr = (S.TagRepr tr) } =
+  [i|mkUnion(#{ctor}, '#{n}', fields, #{show $ S.builtInSize tr}, typeHash, typeSize);|]
 
 nameToConstructor :: String -> String
 nameToConstructor n =
