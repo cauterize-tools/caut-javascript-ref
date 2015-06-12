@@ -37,11 +37,8 @@ generateOutput spec out = do
     libFileName = libName ++ ".js"
 
     renderFiles = do
-      -- lib_tmpl <- getDataFileName "templates/lib_tmpl.js"
-
       writeFile (out `combine` "test_client.js") (testClientFromSpec spec)
       writeFile (out `combine` libFileName) (libFromSpec spec)
-      -- renderTo spec lib_tmpl (out `combine` libFileName)
 
     copyFiles = forM_ allFiles $ \(path, bs) -> B.writeFile (out `combine` path) bs
 
